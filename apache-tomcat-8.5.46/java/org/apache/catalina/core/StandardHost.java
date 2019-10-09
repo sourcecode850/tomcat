@@ -838,6 +838,7 @@ public class StandardHost extends ContainerBase implements Host {
                 if(!found) {
                     Valve valve =
                         (Valve) Class.forName(errorValve).getConstructor().newInstance();
+                    //StandardHost在startInternal()方法中添加管道流valve
                     getPipeline().addValve(valve);
                 }
             } catch (Throwable t) {
