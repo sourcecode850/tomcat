@@ -944,6 +944,8 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         }
 
         // Start the Valves in our pipeline (including the basic), if any
+        //启动工作流：LifeCycleBase的start()方法，里面会继续调用standardPipeline方法，然后层层启动当前容器的管道流
+        //使用了模板方法LifeCycleBase的start()方法是模板方法，startInternal为抽象子类standardPipeline实现
         if (pipeline instanceof Lifecycle) {
             ((Lifecycle) pipeline).start();
         }
