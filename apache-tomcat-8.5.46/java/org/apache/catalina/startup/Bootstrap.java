@@ -68,7 +68,7 @@ public final class Bootstrap {
         // Home first
         String home = System.getProperty(Globals.CATALINA_HOME_PROP);
         File homeFile = null;
-
+        //获取tomcat的安装目录
         if (home != null) {
             File f = new File(home);
             try {
@@ -102,7 +102,7 @@ public final class Bootstrap {
                 homeFile = f.getAbsoluteFile();
             }
         }
-
+        //设置catalinaHomeFile工作目录，默认工作目录就是安装目录
         catalinaHomeFile = homeFile;
         System.setProperty(
                 Globals.CATALINA_HOME_PROP, catalinaHomeFile.getPath());
@@ -132,7 +132,8 @@ public final class Bootstrap {
      */
     private Object catalinaDaemon = null;
 
-
+    //tomcat自定义的三个类加载器，都是URLClassLoader子类
+    //JVM 也有类加载器:BootStrapClassLoader,ExtClassLoader,SystemClassLoader
     ClassLoader commonLoader = null;
     ClassLoader catalinaLoader = null;
     ClassLoader sharedLoader = null;
