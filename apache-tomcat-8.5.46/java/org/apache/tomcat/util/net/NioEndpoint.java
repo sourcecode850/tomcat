@@ -398,7 +398,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             socket.configureBlocking(false);
             Socket sock = socket.socket();
             socketProperties.setProperties(sock);
-
+            //SocketChannel转化为NioChannel
             NioChannel channel = nioChannels.pop();
             if (channel == null) {
                 SocketBufferHandler bufhandler = new SocketBufferHandler(
