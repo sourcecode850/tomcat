@@ -1,11 +1,12 @@
 package com.study.source;
 
+import com.study.source.servlet.Request;
+import com.study.source.servlet.Response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.UUID;
@@ -33,20 +34,12 @@ public class LuBanTomcat {
             while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("接收到请求啦====>" + UUID.randomUUID());
-
-                InputStream inputStream = socket.getInputStream();
-
-                int count = 0;
-                while (count == 0) {
-                    count = inputStream.available();
-                }
-
-                byte[] bytes = new byte[inputStream.available()];
-                System.out.println(new String(bytes));
-
-                socket.getOutputStream().write("hello,mytomcat".getBytes());
+                Request request = new Request(socket.getInputStream());
+                Response response = new Response(socket.getOutputStream());
+                response.writeHtml(request.getUrl());
+                socket.close();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
