@@ -1,5 +1,7 @@
 package com.study.source.config;
 
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,10 @@ public class ServletConfigMapping {
 
     static {
         configs.add(new ServletConfig("/luban", "luban", "com.study.source.servlet.LuBanServlet"));
+    }
+
+    public static List<ServletConfig> getConfigs(){
+        return configs;
     }
 
 
