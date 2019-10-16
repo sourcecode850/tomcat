@@ -44,17 +44,25 @@ public class LuBanTomcat {
             System.out.println("my tomcat start on " + port);
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("接收到请求啦====>" + UUID.randomUUID());
-                Request request = new Request(socket.getInputStream());
-                Response response = new Response(socket.getOutputStream());
-                if ("/".equalsIgnoreCase(request.getUrl())) {
-                    response.write(HttpUtil.getHttpResponseContext404());
-                } else if (stringClassMap.get(request.getUrl()) == null) {
-                    response.writeHtml(request.getUrl());
-                } else {
-                    dispatch(request, response);
-                }
-                socket.close();
+                new Thread(() -> {
+                    System.out.println("接收到请求啦====>" + UUID.randomUUID());
+                    Request request = null;
+                    try {
+                        request = new Request(socket.getInputStream());
+                        Response response = new Response(socket.getOutputStream());
+                        if ("/".equalsIgnoreCase(request.getUrl())) {
+                            response.write(HttpUtil.getHttpResponseContext404());
+                        } else if (stringClassMap.get(request.getUrl()) == null) {
+                            response.writeHtml(request.getUrl());
+                        } else {
+                            dispatch(request, response);
+                        }
+                        socket.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }).start();
             }
         } catch (Exception e) {
             e.printStackTrace();
