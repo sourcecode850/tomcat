@@ -261,6 +261,10 @@ public final class Bootstrap {
 
         SecurityClassLoad.securityClassLoad(catalinaLoader);
 
+        //反射方法实例化Catalina，后面初始化Catalina也用了很多反射。这么做的用意：
+        //因为这些类最终是放在tomcat的catalina.home或者catalina.base目录下，只有自己制定的catalinaLoader才能加载到这些类，所以需要使用反射？
+        //或者说让这些类，被制定的类加载器加载才是目的，用意是啥？所有webapp共用？
+        //实际上可以看到，tomcat代码中除了BootStrap类，其他的类好像都是CatalinaClassLoader或其子类加载器加载的
         // Load our startup class and call its process() method
         if (log.isDebugEnabled())
             log.debug("Loading startup class");
@@ -456,6 +460,9 @@ public final class Bootstrap {
      * @param args Command line arguments to be processed
      */
     public static void main(String args[]) {
+        System.out.println("========================");
+        //sun.misc.Launcher$AppClassLoader@18b4aac2
+        System.out.println(Bootstrap.class.getClassLoader());
 
         if (daemon == null) {
             // Don't set daemon until init() has completed
