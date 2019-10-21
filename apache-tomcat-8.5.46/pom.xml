@@ -6,12 +6,12 @@
 
     <groupId>org.apache.tomcat</groupId>
     <artifactId>apache-tomcat-8.5.46</artifactId>
-	<name>Tomcat8.5.46</name>
+    <name>Tomcat8.5.46</name>
     <version>8.5</version>
-	<packaging>pom</packaging>
+    <packaging>pom</packaging>
 
     <dependencies>
-		<dependency>
+        <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
             <version>3.5</version>
@@ -50,30 +50,45 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>javax.servlet</groupId>-->
-            <!--<artifactId>javax.servlet-api</artifactId>-->
-            <!--<version>3.0.1</version>-->
-            <!--<scope>provided</scope>-->
+        <!--<groupId>javax.servlet</groupId>-->
+        <!--<artifactId>javax.servlet-api</artifactId>-->
+        <!--<version>3.0.1</version>-->
+        <!--<scope>provided</scope>-->
         <!--</dependency>-->
         <!--<dependency>-->
-            <!--<groupId>javax.servlet.jsp</groupId>-->
-            <!--<artifactId>jsp-api</artifactId>-->
-            <!--<version>2.2</version>-->
-            <!--<scope>provided</scope>-->
+        <!--<groupId>javax.servlet.jsp</groupId>-->
+        <!--<artifactId>jsp-api</artifactId>-->
+        <!--<version>2.2</version>-->
+        <!--<scope>provided</scope>-->
         <!--</dependency>-->
 
     </dependencies>
 
-	<build>
+    <build>
         <finalName>Tomcat8.5</finalName>
         <sourceDirectory>java</sourceDirectory>
         <!--<testSourceDirectory>test</testSourceDirectory>-->
         <resources>
             <resource>
                 <directory>java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                </includes>
+                <filtering>false</filtering>
             </resource>
         </resources>
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
