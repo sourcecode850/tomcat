@@ -523,6 +523,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
      */
     @Override
     public void backgroundProcess() {
+        // processExpiresFrequency默认值是6，而backgroundProcess默认每隔10s调用一次，也就是说除了任务执行的消耗，每隔60s执行一次
         count = (count + 1) % processExpiresFrequency;
         if (count == 0)
             processExpires();
@@ -540,6 +541,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
         if(log.isDebugEnabled())
             log.debug("Start expire sessions " + getName() + " at " + timeNow + " sessioncount " + sessions.length);
         for (int i = 0; i < sessions.length; i++) {
+            // 判断session是否还有效
             if (sessions[i]!=null && !sessions[i].isValid()) {
                 expireHere++;
             }
@@ -653,7 +655,8 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
         if (id == null) {
             id = generateSessionId();
         }
-        // 这里给session设置sessionId的时候，顺便将session放入到ManagerBase的sessions保存
+        // 这里给session设置sessionId的时候，顺便将session放入到ManagerBase的sessions保存;
+        // 创建新的session的时候，会发布HttpSessionEvent事件
         session.setId(id);
         sessionCounter++;
 
@@ -686,6 +689,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
 
     @Override
     public Session[] findSessions() {
+        // 将sessions的map转化为session数组
         return sessions.values().toArray(new Session[0]);
     }
 
@@ -712,7 +716,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
                 sessionExpirationTiming.poll();
             }
         }
-
+        // 删除过期的session
         if (session.getIdInternal() != null) {
             sessions.remove(session.getIdInternal());
         }

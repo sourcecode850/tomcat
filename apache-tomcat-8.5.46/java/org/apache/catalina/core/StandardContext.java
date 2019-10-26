@@ -5530,7 +5530,7 @@ public class StandardContext extends ContainerBase
 
         if (!getState().isAvailable())
             return;
-
+        // 热加载class，或者jsp
         Loader loader = getLoader();
         if (loader != null) {
             try {
@@ -5540,6 +5540,7 @@ public class StandardContext extends ContainerBase
                         "standardContext.backgroundProcess.loader", loader), e);
             }
         }
+        // 清理过期session；关注session检查，应该重点关注这个方法
         Manager manager = getManager();
         if (manager != null) {
             try {
@@ -5550,6 +5551,7 @@ public class StandardContext extends ContainerBase
                         e);
             }
         }
+        // 清理资源文件缓存
         WebResourceRoot resources = getResources();
         if (resources != null) {
             try {
@@ -5560,6 +5562,7 @@ public class StandardContext extends ContainerBase
                         resources), e);
             }
         }
+        // 清理对象或者class信息缓存
         InstanceManager instanceManager = getInstanceManager();
         if (instanceManager instanceof DefaultInstanceManager) {
             try {

@@ -954,6 +954,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         setState(LifecycleState.STARTING);
 
         // Start our thread
+        // 开启ContainerBackgroundProcessor线程用于处理子容器，默认情况下backgroundProcessorDelay=-1，不会启用该线程
         threadStart();
     }
 
@@ -1126,6 +1127,9 @@ public abstract class ContainerBase extends LifecycleMBeanBase
      * invoked inside the classloading context of this container. Unexpected
      * throwables will be caught and logged.
      */
+    // 该后台处理方法，不是所有container都覆盖了，实际上这个是不能覆盖的，所有容器都会使用的；就算被StandardContext覆盖了，
+    // 在起方法的末尾还是调用了super.backgroundProcess()；与模板模式有点像啊；只不过模版模式是在方法的头部使用父类方法，尾部使用
+    // 子类方法，而这里是头部使用子类的方法，尾部super父类的方法
     @Override
     public void backgroundProcess() {
 
@@ -1280,8 +1284,8 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
         if (thread != null)
             return;
-        //如果backgroundProcessorDelay小于0，则表示不开启后台线程；如果大于0，则自己开启自己的后台进程，顺便会去开启
-        //子对象的后台线程；并且
+        // 如果backgroundProcessorDelay小于0，则表示不开启后台线程；如果大于0，则自己开启自己的后台进程，顺便会去开启
+        // 子对象的后台线程；大于0会开启自己的后台线程，这里StandardEngine的backgroundProcessorDelay=10，会开启后台线程的
         if (backgroundProcessorDelay <= 0)
             return;
 
@@ -1349,6 +1353,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
             try {
                 while (!threadDone) {
                     try {
+                        //也就是让线程睡10秒，然后再去执行
                         Thread.sleep(backgroundProcessorDelay * 1000L);
                     } catch (InterruptedException e) {
                         // Ignore
@@ -1382,9 +1387,14 @@ public abstract class ContainerBase extends LifecycleMBeanBase
                     // is performed under the web app's class loader
                     originalClassLoader = ((Context) container).bind(false, null);
                 }
+                // 当前容器先处理自己，然后再去处理子容器；这里StandardEngine没有覆盖ContainerBase的backgroundProcess方法
+                // 而StandardContext覆盖了，然后再调用了父类ContainerBase的backgroundProcess方法
                 container.backgroundProcess();
                 Container[] children = container.findChildren();
                 for (int i = 0; i < children.length; i++) {
+                    // 如果子容器的backgroundProcessorDelay小于0，则递归处理子容器
+                    // 因为如果大于0的话，说明子容器自己可以自己开启线程处理，子容器可以自己开启线程处理，可以自己开启线程处理
+                    // 因此父容器不需要再做处理；
                     if (children[i].getBackgroundProcessorDelay() <= 0) {
                         processChildren(children[i]);
                     }
