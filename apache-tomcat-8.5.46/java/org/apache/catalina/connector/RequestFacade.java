@@ -883,7 +883,7 @@ public class RequestFacade implements HttpServletRequest {
 
     @Override
     public HttpSession getSession(boolean create) {
-
+        //2.org.apache.catalina.connector.RequestFacade(HttpServletRequest子类)#getSession
         if (request == null) {
             throw new IllegalStateException(
                             sm.getString("requestFacade.nullRequest"));

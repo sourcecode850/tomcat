@@ -133,6 +133,8 @@ public final class ApplicationFilterChain implements FilterChain {
      * @exception IOException if an input/output error occurs
      * @exception ServletException if a servlet exception occurs
      */
+    //责任链模式：包含链FilterChain，链节点Filter，以及链尾对象servlet，
+    //由链处理管理所有节点和链尾
     @Override
     public void doFilter(ServletRequest request, ServletResponse response)
         throws IOException, ServletException {
@@ -190,6 +192,7 @@ public final class ApplicationFilterChain implements FilterChain {
                     Object[] args = new Object[]{req, res, this};
                     SecurityUtil.doAsPrivilege ("doFilter", filter, classType, args, principal);
                 } else {
+                    //执行拦截器相应的功能
                     filter.doFilter(request, response, this);
                 }
             } catch (IOException | ServletException | RuntimeException e) {
@@ -228,6 +231,7 @@ public final class ApplicationFilterChain implements FilterChain {
                                            args,
                                            principal);
             } else {
+                //原来是这里开始调用的servlet的service方法
                 servlet.service(request, response);
             }
         } catch (IOException | ServletException | RuntimeException e) {

@@ -1280,6 +1280,8 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
         if (thread != null)
             return;
+        //如果backgroundProcessorDelay小于0，则表示不开启后台线程；如果大于0，则自己开启自己的后台进程，顺便会去开启
+        //子对象的后台线程；并且
         if (backgroundProcessorDelay <= 0)
             return;
 

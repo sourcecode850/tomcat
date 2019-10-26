@@ -299,7 +299,7 @@ public class CoyoteAdapter implements Adapter {
     @Override
     public void service(org.apache.coyote.Request req, org.apache.coyote.Response res)
             throws Exception {
-
+        //监听请求：强转Request
         Request request = (Request) req.getNote(ADAPTER_NOTES);
         Response response = (Response) res.getNote(ADAPTER_NOTES);
 
@@ -340,6 +340,7 @@ public class CoyoteAdapter implements Adapter {
                 request.setAsyncSupported(
                         connector.getService().getContainer().getPipeline().isAsyncSupported());
                 // Calling the container
+                //监听请求：调用容器处理请求
                 connector.getService().getContainer().getPipeline().getFirst().invoke(
                         request, response);
             }
@@ -1012,6 +1013,7 @@ public class CoyoteAdapter implements Adapter {
      *
      * @param request The Servlet request object
      */
+    //这个方法负责处理sessionId设置到request对象中
     protected void parseSessionCookiesId(Request request) {
 
         // If session tracking via cookies has been disabled for the current
@@ -1041,6 +1043,7 @@ public class CoyoteAdapter implements Adapter {
                 if (!request.isRequestedSessionIdFromCookie()) {
                     // Accept only the first session id cookie
                     convertMB(scookie.getValue());
+                    //获取sessionID
                     request.setRequestedSessionId
                         (scookie.getValue().toString());
                     request.setRequestedSessionCookie(true);

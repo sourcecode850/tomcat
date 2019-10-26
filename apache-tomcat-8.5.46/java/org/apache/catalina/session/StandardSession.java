@@ -118,6 +118,7 @@ public class StandardSession implements HttpSession, Session, Serializable {
      *
      * @param manager The manager with which this Session is associated
      */
+    //8
     public StandardSession(Manager manager) {
 
         super();

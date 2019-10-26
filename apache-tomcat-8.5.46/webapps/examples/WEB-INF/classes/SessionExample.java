@@ -75,7 +75,7 @@ public class SessionExample extends HttpServlet {
                     "width=24 align=right border=0 alt=\"return\"></a>");
 
         out.println("<h3>" + title + "</h3>");
-
+        //1.HttpServletRequest#getSession
         HttpSession session = request.getSession(true);
         out.println(RB.getString("sessions.id") + " " + session.getId());
         out.println("<br>");

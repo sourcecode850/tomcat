@@ -609,7 +609,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
         }
     }
 
-
+    //session.setId()的时候，会调用该方法保存session到StandardManager中
     @Override
     public void add(Session session) {
         sessions.put(session.getIdInternal(), session);
@@ -629,7 +629,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
         support.addPropertyChangeListener(listener);
     }
 
-
+    //createSession，直接new StandardSession
     @Override
     public Session createSession(String sessionId) {
 
@@ -653,9 +653,12 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
         if (id == null) {
             id = generateSessionId();
         }
+        // 这里给session设置sessionId的时候，顺便将session放入到ManagerBase的sessions保存
         session.setId(id);
         sessionCounter++;
 
+        // TODO SessionTiming作用是啥？没有体会到是为了方便清理过期session
+        //百度http://cmsblogs.com/?p=2678 将创建时间添加到LinkedList中，并且把最先添加的时间移除，主要还是方便清理过期session
         SessionTiming timing = new SessionTiming(session.getCreationTime(), 0);
         synchronized (sessionCreationTiming) {
             sessionCreationTiming.add(timing);
@@ -664,7 +667,8 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
         return session;
     }
 
-
+    //将创建出来的session与该ManagerBase绑定起来，657行，setId时候会将session放入到ManagerBase的sessionsMap中
+    //注意继承覆盖调用
     @Override
     public Session createEmptySession() {
         return getNewSession();
@@ -797,6 +801,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
      * Get new session class to be used in the doLoad() method.
      * @return a new session for use with this manager
      */
+    //7
     protected StandardSession getNewSession() {
         return new StandardSession(this);
     }

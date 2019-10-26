@@ -372,6 +372,8 @@ public interface HttpServletRequest extends ServletRequest {
      *         and the request has no valid session
      * @see #getSession()
      */
+    //创建session，从org.apache.catalina.connector.Request#getSession开始
+    //org.apache.catalina.connector.Request是改HttpServletRequest的实现类
     public HttpSession getSession(boolean create);
 
     /**

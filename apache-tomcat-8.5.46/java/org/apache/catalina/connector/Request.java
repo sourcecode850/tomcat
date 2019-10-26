@@ -2451,11 +2451,12 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
      */
     @Override
     public HttpSession getSession(boolean create) {
+        //3.org.apache.catalina.connector.Request#getSession开始
         Session session = doGetSession(create);
         if (session == null) {
             return null;
         }
-
+        //返回StandardSessionFacade
         return session.getSession();
     }
 
@@ -2969,6 +2970,7 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
 
     // ------------------------------------------------------ Protected Methods
 
+    //4.org.apache.catalina.connector.Request是HttpServletRequest子类#doGetSession
     protected Session doGetSession(boolean create) {
 
         // There cannot be a session if no context has been assigned yet
@@ -2992,6 +2994,7 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
         }
         if (requestedSessionId != null) {
             try {
+                //根据requestedSessionId去StandardManager中取session
                 session = manager.findSession(requestedSessionId);
             } catch (IOException e) {
                 session = null;
@@ -3000,6 +3003,7 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
                 session = null;
             }
             if (session != null) {
+                //修改session时间
                 session.access();
                 return session;
             }
@@ -3069,7 +3073,7 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
         if (session == null) {
             return null;
         }
-
+        //更新thisAccessedTime
         session.access();
         return session;
     }

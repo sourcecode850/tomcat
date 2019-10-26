@@ -93,6 +93,7 @@ final class StandardWrapperValve
     public final void invoke(Request request, Response response)
         throws IOException, ServletException {
 
+        //这里开始调用servlet的方法，强转Request为RequestWrapper
         // Initialize local variables we may need
         boolean unavailable = false;
         Throwable throwable = null;
@@ -196,6 +197,7 @@ final class StandardWrapperValve
                     if (request.isAsyncDispatching()) {
                         request.getAsyncContextInternal().doInternalDispatch();
                     } else {
+                        //request.getRequest()方法会将Request转化为RequestWrapper类型
                         filterChain.doFilter
                             (request.getRequest(), response.getResponse());
                     }
