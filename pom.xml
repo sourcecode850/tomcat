@@ -17,5 +17,6 @@
 	<modules>
 		<module>apache-tomcat-8.5.46</module>
         <module>MyTomcat</module>
+        <module>tomcat-skills-study</module>
     </modules>
 </project>
