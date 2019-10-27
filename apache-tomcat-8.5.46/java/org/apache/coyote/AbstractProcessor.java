@@ -77,6 +77,7 @@ public abstract class AbstractProcessor extends AbstractProcessorLight implement
     protected final UserDataHelper userDataHelper;
 
     public AbstractProcessor(AbstractEndpoint<?> endpoint) {
+        // 初始化coyote.Request
         this(endpoint, new Request(), new Response());
     }
 

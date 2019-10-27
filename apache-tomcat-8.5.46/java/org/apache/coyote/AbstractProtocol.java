@@ -796,7 +796,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                     }
                 }
                 if (processor == null) {
-                    // 创建Http11Processor协议处理器
+                    // 创建Http11Processor协议处理器；这里也负责初始化coyote.Request
                     processor = getProtocol().createProcessor();
                     register(processor);
                 }
