@@ -772,6 +772,7 @@ public class Http11Processor extends AbstractProcessor {
                 // Setting up filters, and parse some request headers
                 rp.setStage(org.apache.coyote.Constants.STAGE_PREPARE);
                 try {
+                    //
                     prepareRequest();
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
@@ -795,7 +796,7 @@ public class Http11Processor extends AbstractProcessor {
             if (getErrorState().isIoAllowed()) {
                 try {
                     rp.setStage(org.apache.coyote.Constants.STAGE_SERVICE);
-                    //监听请求：调用容器处理请求
+                    //监听请求：调用合适的service处理请求，这里adapter是CoyoteAdapter类型
                     getAdapter().service(request, response);
                     // Handle when the response was committed before a serious
                     // error occurred.  Throwing a ServletException should both

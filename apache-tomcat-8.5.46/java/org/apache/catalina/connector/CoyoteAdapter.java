@@ -299,7 +299,8 @@ public class CoyoteAdapter implements Adapter {
     @Override
     public void service(org.apache.coyote.Request req, org.apache.coyote.Response res)
             throws Exception {
-        //监听请求：强转Request
+        // 原来这里还可以将上个请求的过滤器链复用啊
+        // org.apache.coyote.Request注意不是connector.Request，是final类，覆盖toString()方法
         Request request = (Request) req.getNote(ADAPTER_NOTES);
         Response response = (Response) res.getNote(ADAPTER_NOTES);
 
@@ -315,6 +316,11 @@ public class CoyoteAdapter implements Adapter {
             response.setRequest(request);
 
             // Set as notes
+            // 这里会将请求request放入到req中保存起来，下次相同的请求可以复用request对象了；这样过滤器链就不需要
+            // 再重新创建了； 现在的疑问是，上次请求的req与本次的req如果做到一样？又不是单例的吧；
+            // 上次的req将request对象保存到req中，本次的req如何从上次的req中取到request对象呢？？
+            // 这里似乎不管什么类型的req都能取到request对象，怎么做到的呢？
+            // TODO 研究这个重复利用request对象是如何做到的额！！！！
             req.setNote(ADAPTER_NOTES, request);
             res.setNote(ADAPTER_NOTES, response);
 
@@ -340,7 +346,7 @@ public class CoyoteAdapter implements Adapter {
                 request.setAsyncSupported(
                         connector.getService().getContainer().getPipeline().isAsyncSupported());
                 // Calling the container
-                //监听请求：调用容器处理请求
+                //监听请求：调用容器处理请求；这里service.getContainer()是engine
                 connector.getService().getContainer().getPipeline().getFirst().invoke(
                         request, response);
             }
@@ -1043,7 +1049,7 @@ public class CoyoteAdapter implements Adapter {
                 if (!request.isRequestedSessionIdFromCookie()) {
                     // Accept only the first session id cookie
                     convertMB(scookie.getValue());
-                    //获取sessionID
+                    //获取sessionID，重新设置到request中
                     request.setRequestedSessionId
                         (scookie.getValue().toString());
                     request.setRequestedSessionCookie(true);

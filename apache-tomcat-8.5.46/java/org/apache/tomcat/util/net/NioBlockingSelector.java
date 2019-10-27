@@ -287,6 +287,7 @@ public class NioBlockingSelector {
         public void run() {
             while (run) {
                 try {
+                    // NioBlockingSelector一直监听请求
                     events();
                     int keyCount = 0;
                     try {

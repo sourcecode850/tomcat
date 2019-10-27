@@ -65,8 +65,10 @@ public final class ApplicationFilterFactory {
                 // Security: Do not recycle
                 filterChain = new ApplicationFilterChain();
             } else {
+                // 可以重复使用的，先去request中取
                 filterChain = (ApplicationFilterChain) req.getFilterChain();
                 if (filterChain == null) {
+                    //将链设置到当前req中，这样在servlet中也是可以拿到请求链的；
                     filterChain = new ApplicationFilterChain();
                     req.setFilterChain(filterChain);
                 }
@@ -75,7 +77,7 @@ public final class ApplicationFilterFactory {
             // Request dispatcher in use
             filterChain = new ApplicationFilterChain();
         }
-
+        //chain中保存servlet
         filterChain.setServlet(servlet);
         filterChain.setServletSupportsAsync(wrapper.isAsyncSupported());
 
@@ -112,6 +114,7 @@ public final class ApplicationFilterFactory {
                 // FIXME - log configuration problem
                 continue;
             }
+            // chain保存符合该请求url的过滤器节点
             filterChain.addFilter(filterConfig);
         }
 

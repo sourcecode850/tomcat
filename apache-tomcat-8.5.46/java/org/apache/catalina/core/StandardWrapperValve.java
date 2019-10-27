@@ -93,7 +93,8 @@ final class StandardWrapperValve
     public final void invoke(Request request, Response response)
         throws IOException, ServletException {
 
-        //这里开始调用servlet的方法，强转Request为RequestWrapper
+        // 这里开始调用servlet的方法，强转Request为RequestWrapper，200l代码，可知
+        // servlet执行时候，其实是一个链，链尾是servlet，链节点是各种filter
         // Initialize local variables we may need
         boolean unavailable = false;
         Throwable throwable = null;
@@ -169,7 +170,10 @@ final class StandardWrapperValve
         request.setAttribute(Globals.DISPATCHER_TYPE_ATTR,dispatcherType);
         request.setAttribute(Globals.DISPATCHER_REQUEST_PATH_ATTR,
                 requestPathMB);
-        // Create the filter chain for this request
+        // Create the filter chain for this request；
+        // 创建该请求的过滤器链，先从request中去取，没有的话，再建，建好后设置到request中
+        // coyoteAdapter#service 300行，可以看到coyote.Req与connector.Request的关系
+        // 下面，会将connector.Request转化为RequestFacade交给过滤器链进行处理
         ApplicationFilterChain filterChain =
                 ApplicationFilterFactory.createFilterChain(request, wrapper, servlet);
 
@@ -197,7 +201,8 @@ final class StandardWrapperValve
                     if (request.isAsyncDispatching()) {
                         request.getAsyncContextInternal().doInternalDispatch();
                     } else {
-                        //request.getRequest()方法会将Request转化为RequestWrapper类型
+                        // request.getRequest()方法会将Request转化为RequestFacade类型
+                        // connector.Request转化为RequestFacade类型进行处理
                         filterChain.doFilter
                             (request.getRequest(), response.getResponse());
                     }

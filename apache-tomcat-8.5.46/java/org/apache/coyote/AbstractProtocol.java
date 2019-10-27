@@ -788,6 +788,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                     }
                 }
                 if (processor == null) {
+                    // 先从缓存中取，没有的话，再创建
                     processor = recycledProcessors.pop();
                     if (getLog().isDebugEnabled()) {
                         getLog().debug(sm.getString("abstractConnectionHandler.processorPop",
@@ -795,6 +796,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                     }
                 }
                 if (processor == null) {
+                    // 创建Http11Processor协议处理器
                     processor = getProtocol().createProcessor();
                     register(processor);
                 }
@@ -807,6 +809,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
 
                 SocketState state = SocketState.CLOSED;
                 do {
+                    // 协议处理器处理请求
                     state = processor.process(wrapper, status);
 
                     if (state == SocketState.UPGRADING) {
@@ -878,6 +881,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                     // In keep-alive but between requests. OK to recycle
                     // processor. Continue to poll for the next request.
                     connections.remove(socket);
+                    // 799上面创建的Http11Processor协议处理器放入到缓存中
                     release(processor);
                     wrapper.registerReadInterest();
                 } else if (state == SocketState.SENDFILE) {

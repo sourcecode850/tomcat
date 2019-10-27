@@ -269,7 +269,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             }
 
             initializeConnectionLatch();
-
+            // 原来一切源头在此：EndPoint.startInternal()方法；默认启动2与处理器内核更小的线程数
             // Start poller threads
             pollers = new Poller[getPollerThreadCount()];
             for (int i=0; i<pollers.length; i++) {
@@ -811,7 +811,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
         public void run() {
             // Loop until destroy() is called
             while (true) {
-
+                // Endpoint负责监听请求：准确来说是NioEndpoint的内部类poller负责监听请求
                 boolean hasEvents = false;
 
                 try {
@@ -857,6 +857,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                         iterator.remove();
                     } else {
                         iterator.remove();
+                        // 监听到请求则处理
                         processKey(sk, attachment);
                     }
                 }//while
@@ -870,6 +871,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
         protected void processKey(SelectionKey sk, NioSocketWrapper attachment) {
             try {
+                // 先是NioEndPoint自己的processKey方法处理
                 if ( close ) {
                     cancelledKey(sk);
                 } else if ( sk.isValid() && attachment != null ) {
@@ -886,6 +888,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                                 }
                             }
                             if (!closeSocket && sk.isWritable()) {
+                                // 如果是写事件，交给processSocket()方法进行处理
                                 if (!processSocket(attachment, SocketEvent.OPEN_WRITE, true)) {
                                     closeSocket = true;
                                 }
@@ -1456,6 +1459,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
         @Override
         protected void doRun() {
+            // socket处理器最后还是要调用NioEndpoint内部类SocketProcessor的doRun方法
             NioChannel socket = socketWrapper.getSocket();
             SelectionKey key = socket.getIOChannel().keyFor(socket.getPoller().getSelector());
 
@@ -1497,6 +1501,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                     if (event == null) {
                         state = getHandler().process(socketWrapper, SocketEvent.OPEN_READ);
                     } else {
+                        // 寻找对应的handler进行处理；是AbstractProtocol#ConnectionHandler内部类
                         state = getHandler().process(socketWrapper, event);
                     }
                     if (state == SocketState.CLOSED) {
@@ -1506,8 +1511,10 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                     getHandler().process(socketWrapper, SocketEvent.CONNECT_FAIL);
                     close(socket, key);
                 } else if (handshake == SelectionKey.OP_READ){
+                    // 注册感兴趣的读事件
                     socketWrapper.registerReadInterest();
                 } else if (handshake == SelectionKey.OP_WRITE){
+                    // 注册感兴趣的写事件
                     socketWrapper.registerWriteInterest();
                 }
             } catch (CancelledKeyException cx) {

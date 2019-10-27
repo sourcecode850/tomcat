@@ -662,6 +662,7 @@ public class Request implements org.apache.catalina.servlet4preview.http.HttpSer
         if (applicationRequest == null) {
             applicationRequest = facade;
         }
+        // 这里也是request的门面
         return applicationRequest;
     }
 

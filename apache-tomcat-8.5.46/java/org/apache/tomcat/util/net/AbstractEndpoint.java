@@ -1071,10 +1071,14 @@ public abstract class AbstractEndpoint<S> {
             }
             SocketProcessorBase<S> sc = processorCache.pop();
             if (sc == null) {
+                // 创建socket处理器
                 sc = createSocketProcessor(socketWrapper, event);
             } else {
+                // 重置socket处理器
                 sc.reset(socketWrapper, event);
             }
+
+            // 执行socket处理器；可以去SocketProcessorBase的run方法了
             Executor executor = getExecutor();
             if (dispatch && executor != null) {
                 executor.execute(sc);
