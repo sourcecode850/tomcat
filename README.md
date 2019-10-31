@@ -4,11 +4,11 @@
 
 ## 直接使用open打开项目
 
-![Project](/Users/Flint92/sourcecode850/tomcat/Project.png)
+![Project](Project.png)
 
 ##  配置启动类
 
-![BootstrapClass](/Users/Flint92/sourcecode850/tomcat/BootstrapClass.png)
+![BootstrapClass](BootstrapClass.png)
 
 
 
@@ -29,7 +29,7 @@ catalina-home是tomcat配置文件，生成文件存放目录
 
 选中`apache-tomcat-8.5.46`，点击Build下面的`Build Module 'apache-tomcat-8.5.46'`
 
-![BuildModule](/Users/Flint92/sourcecode850/tomcat/BuildModule.png)
+![BuildModule](BuildModule.png)
 
 ```shell
 关于Mac系统Build模块之后，.xml和.properties等资源文件无法编译进去的解决方案，在apache-tomcat-8.5.46模块根目录下面执行`mvn resources:resources`	命令即可
