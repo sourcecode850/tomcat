@@ -1,0 +1,15 @@
+@startuml
+' 初始化Connector及其组件
+Actor Service
+Service -> Connector: init()
+Connector -> CoyoteAdapter: new CoyoteAdapter(this)
+Connector <-- CoyoteAdapter: adapter
+Connector -> ProtocolHandler: protocolHandler.setAdapter(adapter)
+Connector -> ProtocolHandler: init()
+ProtocolHandler -> AbstractProtocol: super.init()
+AbstractProtocol -> EndPonit: init()
+
+
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: another authentication Response
+@enduml

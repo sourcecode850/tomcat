@@ -673,11 +673,12 @@ public class Http11Processor extends AbstractProcessor {
         readComplete = true;
         boolean keptAlive = false;
         SendfileState sendfileState = SendfileState.DONE;
-
+        // 判断状态
         while (!getErrorState().isError() && keepAlive && !isAsync() && upgradeToken == null &&
                 sendfileState == SendfileState.DONE && !endpoint.isPaused()) {
 
             // Parsing the request header
+            // 解析request请求头
             try {
                 if (!inputBuffer.parseRequestLine(keptAlive)) {
                     if (inputBuffer.getParsingRequestLinePhase() == -1) {
@@ -797,6 +798,7 @@ public class Http11Processor extends AbstractProcessor {
                 try {
                     rp.setStage(org.apache.coyote.Constants.STAGE_SERVICE);
                     //监听请求：调用合适的service处理请求，这里adapter是CoyoteAdapter类型
+                    // 处理 request，见 CoyoteAdapter 解析
                     getAdapter().service(request, response);
                     // Handle when the response was committed before a serious
                     // error occurred.  Throwing a ServletException should both

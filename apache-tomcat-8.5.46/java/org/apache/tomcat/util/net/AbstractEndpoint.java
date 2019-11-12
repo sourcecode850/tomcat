@@ -1069,6 +1069,7 @@ public abstract class AbstractEndpoint<S> {
             if (socketWrapper == null) {
                 return false;
             }
+            // 从 栈中取一个
             SocketProcessorBase<S> sc = processorCache.pop();
             if (sc == null) {
                 // 创建socket处理器
@@ -1189,8 +1190,9 @@ public abstract class AbstractEndpoint<S> {
         }
     }
 
-
+    // AbstractEndpoint
     public final void start() throws Exception {
+        // 判断是否绑定过
         if (bindState == BindState.UNBOUND) {
             bind();
             bindState = BindState.BOUND_ON_START;
@@ -1203,6 +1205,7 @@ public abstract class AbstractEndpoint<S> {
         acceptors = new Acceptor[count];
 
         for (int i = 0; i < count; i++) {
+            // NioEndpoint 中实现,new Acceptor()
             acceptors[i] = createAcceptor();
             String threadName = getName() + "-Acceptor-" + i;
             acceptors[i].setThreadName(threadName);

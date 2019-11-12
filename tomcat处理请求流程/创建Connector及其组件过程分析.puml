@@ -1,0 +1,12 @@
+@startuml
+' 创建Connector及其组件过程分析
+Actor ConnectorCreateRule
+ConnectorCreateRule -> Connector: new Connector(attributes.getValue("protocol"));
+Connector -> Http11NioProtocol: clazz.getConstructor().newInstance()
+Http11NioProtocol -> AbstractHttp11Protocol: super(new NioEndpoint())
+AbstractHttp11Protocol -> ConnectionHandler: new ConnectionHandler()
+AbstractHttp11Protocol <-- ConnectionHandler: cHandler
+AbstractHttp11Protocol -> AbstractHttp11Protocol:  setHandler(cHandler);
+AbstractHttp11Protocol -> AbstractHttp11Protocol:  getEndpoint().setHandler(cHandler)
+
+@enduml

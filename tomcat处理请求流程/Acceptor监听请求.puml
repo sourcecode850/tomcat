@@ -1,0 +1,16 @@
+@startuml
+' AbstractEndpoint.Acceptor
+EndPonit -> EndPonit: startAcceptorThreads()
+Acceptor -> Acceptor: run()
+Acceptor -> ServerSocket: accept()
+Acceptor <-- ServerSocket: socket
+Acceptor -> EndPonit: countDownConnection()
+Acceptor -> EndPonit: setSocketOptions()
+EndPonit -> EndPonit: getPoller0()
+EndPonit -> Poller: register(socket)
+Poller -> NioChannel: setPoller(this)
+Poller -> Poller: addEvent(r)
+Poller -> Poller: events.offer(event);
+
+
+@enduml

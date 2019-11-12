@@ -303,7 +303,7 @@ public class CoyoteAdapter implements Adapter {
         // org.apache.coyote.Request注意不是connector.Request，是final类，覆盖toString()方法
         Request request = (Request) req.getNote(ADAPTER_NOTES);
         Response response = (Response) res.getNote(ADAPTER_NOTES);
-
+        // request == null，新建并关联
         if (request == null) {
             // Create objects
             request = connector.createRequest();
@@ -327,7 +327,8 @@ public class CoyoteAdapter implements Adapter {
             // Set query string encoding
             req.getParameters().setQueryStringCharset(connector.getURICharset());
         }
-
+        // 设置请求头，告知网站是用何种语言或框架编写的
+        // 默认false，Servlet/4.0 JSP/2.3xxxxxxxxxxxxxx
         if (connector.getXpoweredBy()) {
             response.addHeader("X-Powered-By", POWERED_BY);
         }
@@ -340,6 +341,7 @@ public class CoyoteAdapter implements Adapter {
         try {
             // Parse and set Catalina and configuration specific
             // request parameters
+            // 请求映射、解析参数等操作。
             postParseSuccess = postParseRequest(req, request, res, response);
             if (postParseSuccess) {
                 //check valves if we support async
@@ -347,6 +349,7 @@ public class CoyoteAdapter implements Adapter {
                         connector.getService().getContainer().getPipeline().isAsyncSupported());
                 // Calling the container
                 //监听请求：调用容器处理请求；这里service.getContainer()是engine
+                // 由 Pipeline 处理流程
                 connector.getService().getContainer().getPipeline().getFirst().invoke(
                         request, response);
             }
@@ -426,6 +429,7 @@ public class CoyoteAdapter implements Adapter {
 
             // Recycle the wrapper request and response
             if (!async) {
+                // 回收 request and response
                 updateWrapperErrorCount(request, response);
                 request.recycle();
                 response.recycle();

@@ -573,11 +573,14 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
             Registry.getRegistry(null, null).registerComponent(
                     getHandler().getGlobal(), rgOname, null);
         }
-
+        // endpointName---"http-nio-8080": http-nio  +  8080 组成
         String endpointName = getName();
+        // 去掉 双引号
         endpoint.setName(endpointName.substring(1, endpointName.length()-1));
+        // domain ==  catalina
         endpoint.setDomain(domain);
-
+        // Endpoint的初始化操作
+        // serverSocketChannel 绑定端口
         endpoint.init();
     }
 
@@ -587,10 +590,12 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         if (getLog().isInfoEnabled()) {
             getLog().info(sm.getString("abstractProtocolHandler.start", getName()));
         }
-
+        // Endpoint 的 start 方法，重点
+        // 创建 Executor、最大连接、开启 Poller thread
         endpoint.start();
 
         // Start timeout thread
+        // 异步超时 线程
         asyncTimeout = new AsyncTimeout();
         Thread timeoutThread = new Thread(asyncTimeout, getNameInternal() + "-AsyncTimeout");
         int priority = endpoint.getThreadPriority();
@@ -718,8 +723,10 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
             }
 
             S socket = wrapper.getSocket();
-
+            // 根据Socket获取具体协议的处理器
             Processor processor = connections.get(socket);
+            // 如果process==null，尝试其它协议、新建等
+            // SSL 支持
             if (getLog().isDebugEnabled()) {
                 getLog().debug(sm.getString("abstractConnectionHandler.connectionsGet",
                         processor, socket));
@@ -1148,11 +1155,13 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         /**
          * The background thread that checks async requests and fires the
          * timeout if there has been no activity.
+         * 后台线程检查异步请求并在没有活动时触发超时
          */
         @Override
         public void run() {
 
             // Loop until we receive a shutdown command
+            // 死循环，直到接收到 shutdown 命令
             while (asyncTimeoutRunning) {
                 try {
                     Thread.sleep(1000);
@@ -1165,6 +1174,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                 }
 
                 // Loop if endpoint is paused
+                // 循环，直到 Endpoint pause
                 while (endpoint.isPaused() && asyncTimeoutRunning) {
                     try {
                         Thread.sleep(1000);

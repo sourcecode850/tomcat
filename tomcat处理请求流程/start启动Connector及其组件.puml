@@ -1,0 +1,25 @@
+@startuml
+
+' 初始化Connector及其组件
+Actor Service
+Service -> Connector: addConnector()
+Connector -> ProtocolHandler: start()
+AbstractProtocol -> EndPonit: start()
+EndPonit -> EndPonit: bind()
+EndPonit -> ServerSocketChannel: open()
+EndPonit <-- ServerSocketChannel: serverSock
+EndPonit -> EndPonit: startInternal()
+' 启动poller线程
+EndPonit -> Poller: new Poller[getPollerThreadCount()
+EndPonit -> Thread: new Thread()
+EndPonit <-- Thread: pollerThread
+EndPonit -> EndPonit: pollerThread.start()
+' 启动Acceptor线程
+EndPonit -> EndPonit: startAcceptorThreads()
+AbstractProtocol -> AsyncTimeout: new AsyncTimeout()
+AbstractProtocol <-- AsyncTimeout: asyncTimeout
+AbstractProtocol -> Thread: new Thread()
+AbstractProtocol <-- Thread: asyncTimeoutThread
+AbstractProtocol -> AbstractProtocol: asyncTimeoutThread.start()
+
+@enduml

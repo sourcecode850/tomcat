@@ -71,11 +71,23 @@ public class Connector extends LifecycleMBeanBase  {
     }
 
     public Connector(String protocol) {
+        // 根据 server.xml 中 Connector 属性 protocol 的值找合适的 className
+        // 此处返回  org.apache.coyote.http11.Http11NioProtocol
+        // 赋值给  ProtocolHandler
+        /*
+
+        <Connector port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443" />
+        <Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />
+
+         */
         setProtocol(protocol);
         // Instantiate protocol handler
         ProtocolHandler p = null;
         try {
             Class<?> clazz = Class.forName(protocolHandlerClassName);
+            // 反射生成 Http11NioProtocol 时，在构造函数中 生成了 NioEndpoint
             p = (ProtocolHandler) clazz.getConstructor().newInstance();
         } catch (Exception e) {
             log.error(sm.getString(
@@ -83,7 +95,7 @@ public class Connector extends LifecycleMBeanBase  {
         } finally {
             this.protocolHandler = p;
         }
-
+        // 设置编码集
         if (Globals.STRICT_SERVLET_COMPLIANCE) {
             uriCharset = StandardCharsets.ISO_8859_1;
         } else {
@@ -959,14 +971,16 @@ public class Connector extends LifecycleMBeanBase  {
         }
     }
 
-
+    // 初始化操作
     @Override
     protected void initInternal() throws LifecycleException {
 
         super.initInternal();
 
         // Initialize adapter
+        // 初始化是配置  CoyoteAdapter(Connector 作为参数)
         adapter = new CoyoteAdapter(this);
+        // 协议处理器绑定 适配器
         protocolHandler.setAdapter(adapter);
 
         // Make sure parseBodyMethodsSet has a default
@@ -990,6 +1004,7 @@ public class Connector extends LifecycleMBeanBase  {
         }
 
         try {
+            // 执行 协议处理器初始化操作
             protocolHandler.init();
         } catch (Exception e) {
             throw new LifecycleException(
@@ -1003,6 +1018,7 @@ public class Connector extends LifecycleMBeanBase  {
      *
      * @exception LifecycleException if a fatal startup error occurs
      */
+    // 使用此 连接器处理 请求
     @Override
     protected void startInternal() throws LifecycleException {
 
@@ -1011,10 +1027,11 @@ public class Connector extends LifecycleMBeanBase  {
             throw new LifecycleException(sm.getString(
                     "coyoteConnector.invalidPort", Integer.valueOf(getPort())));
         }
-
+        // 设置生命周期状态值
         setState(LifecycleState.STARTING);
 
         try {
+            // 调用 协议处理器 start 方法
             protocolHandler.start();
         } catch (Exception e) {
             throw new LifecycleException(

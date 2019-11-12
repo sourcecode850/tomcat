@@ -1,0 +1,31 @@
+@startuml
+Actor AbstractProtocol
+AbstractProtocol -> EndPonit: start()
+EndPonit -> NioEndpoint: startInternal()
+NioEndpoint -> NioEndpoint: createExecutor()
+NioEndpoint -> NioEndpoint: initializeConnectionLatch()
+NioEndpoint -> Poller: pollerThread.start()
+NioEndpoint -> Poller: run()
+Poller -> Poller: processKey(sk, attachment)
+Poller -> Poller: processSocket(attachment, SocketEvent.OPEN_READ, true)
+Poller -> Poller: createSocketProcessor(socketWrapper, event)
+Poller -> SocketProcessor: new SocketProcessor(socketWrapper, event)
+Poller <-- SocketProcessor: sc
+Poller -> Poller: getExecutor().execute(sc)
+Poller -> SocketProcessor: doRun()
+SocketProcessor -> SocketProcessor: getHandler()
+SocketProcessor -> ConnectionHandler: process(socketWrapper, event)
+SocketProcessor -> SocketProcessor: Http11Processor processor = connections.get(socket)
+Http11Processor -> AbstractProcessorLight: process()
+AbstractProcessorLight -> AbstractProcessorLight: service(socketWrapper)
+AbstractProcessorLight -> Http11Processor: service(socketWrapper)
+Http11Processor -> Http11Processor: prepareRequest()
+Http11Processor -> Http11Processor: getAdapter()
+Http11Processor --> Http11Processor: coyoteAdapter
+Http11Processor --> CoyoteAdapter: service(request, response)
+CoyoteAdapter --> CoyoteAdapter: connector.getService().getContainer().getPipeline().getFirst().invoke(request, response)
+
+Poller -> Poller: timeout(keyCount,hasEvents)
+Poller -> Poller: getStopLatch().countDown()
+
+@enduml

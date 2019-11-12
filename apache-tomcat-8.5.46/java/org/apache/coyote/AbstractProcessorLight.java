@@ -36,7 +36,7 @@ public abstract class AbstractProcessorLight implements Processor {
 
     private Set<DispatchType> dispatches = new CopyOnWriteArraySet<>();
 
-
+    // AbstractProcessorLight(公共父类)
     @Override
     public SocketState process(SocketWrapperBase<?> socketWrapper, SocketEvent status)
             throws IOException {
@@ -44,6 +44,7 @@ public abstract class AbstractProcessorLight implements Processor {
         SocketState state = SocketState.CLOSED;
         Iterator<DispatchType> dispatches = null;
         do {
+            // 根据 SocketEvent 所处的 状态执行不同操作
             if (dispatches != null) {
                 DispatchType nextDispatch = dispatches.next();
                 state = dispatch(nextDispatch.getSocketStatus());
@@ -57,6 +58,7 @@ public abstract class AbstractProcessorLight implements Processor {
                     // release() which will recycle the processor (and input
                     // buffer) deleting any pipe-lined data. To avoid this,
                     // process it now.
+                    // 调用具体协议的service方法处理请求
                     state = service(socketWrapper);
                 }
             } else if (status == SocketEvent.OPEN_WRITE) {
