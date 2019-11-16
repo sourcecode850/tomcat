@@ -1058,8 +1058,9 @@ public abstract class ContainerBase extends LifecycleMBeanBase
             boolean useDefault) {
 
         boolean logged = false;
-
+        // 获取注册的日志组件
         if (getAccessLog() != null) {
+            // 调用适配器的log方法
             getAccessLog().log(request, response, time);
             logged = true;
         }
@@ -1073,11 +1074,11 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
     @Override
     public AccessLog getAccessLog() {
-
+        // 默认false
         if (accessLogScanComplete) {
             return accessLog;
         }
-
+        // AccessLog日志适配器
         AccessLogAdapter adapter = null;
         Valve valves[] = getPipeline().getValves();
         for (Valve valve : valves) {

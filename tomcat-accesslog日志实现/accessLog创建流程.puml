@@ -1,0 +1,11 @@
+@startuml
+
+BootStrap -> BootStrap: main(String[])
+BootStrap -> BootStrap: load(String[])
+BootStrap -> Catalina: 反射调用load()
+Catalina -> Digester: configure()
+Digester -> JAXpSAXParser: configure()
+Digester -> ObjectCreateRule: begin()
+ObjectCreateRule -> MyAccessLogValve: clazz.getConstructor().newInstance()
+
+@enduml

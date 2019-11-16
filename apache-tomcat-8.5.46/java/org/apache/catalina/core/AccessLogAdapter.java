@@ -29,19 +29,19 @@ import org.apache.catalina.connector.Response;
 public class AccessLogAdapter implements AccessLog {
 
     private AccessLog[] logs;
-
+    // 构造器
     public AccessLogAdapter(AccessLog log) {
         Objects.requireNonNull(log);
         logs = new AccessLog[] { log };
     }
-
+    // 添加新的 访问日志 AccessLog
     public void add(AccessLog log) {
         Objects.requireNonNull(log);
         AccessLog newArray[] = Arrays.copyOf(logs, logs.length + 1);
         newArray[newArray.length - 1] = log;
         logs = newArray;
     }
-
+    // AccessLog接口中的 log，循环执行
     @Override
     public void log(Request request, Response response, long time) {
         for (AccessLog log: logs) {

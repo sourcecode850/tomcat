@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.apache.catalina.AccessLog</OriginalElement>
+  <nodes>
+    <node x="0.0" y="655.0">org.apache.catalina.valves.AccessLogValve</node>
+    <node x="645.8055555555554" y="114.0">org.apache.catalina.valves.JDBCAccessLogValve</node>
+    <node x="99.80555555555549" y="240.5">org.apache.catalina.valves.AbstractAccessLogValve</node>
+    <node x="372.8055555555555" y="332.5">org.apache.catalina.core.AccessLogAdapter</node>
+    <node x="918.8055555555555" y="332.5">org.apache.catalina.core.StandardEngine.NoopAccessLog</node>
+    <node x="225.0" y="770.0">my.log.MyAccessLogValve</node>
+    <node x="95.72453703703695" y="966.0">org.apache.catalina.valves.ExtendedAccessLogValve</node>
+    <node x="439.12499999999994" y="0.0">org.apache.catalina.AccessLog</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.apache.catalina.valves.ExtendedAccessLogValve" target="org.apache.catalina.valves.AccessLogValve">
+      <point x="0.0" y="-15.5" />
+      <point x="193.72453703703695" y="941.0" />
+      <point x="153.75" y="941.0" />
+      <point x="51.25" y="130.5" />
+    </edge>
+    <edge source="org.apache.catalina.valves.AbstractAccessLogValve" target="org.apache.catalina.AccessLog">
+      <point x="0.0" y="-119.0" />
+      <point x="226.3055555555555" y="74.0" />
+      <point x="454.93749999999994" y="74.0" />
+      <point x="-110.6875" y="27.0" />
+    </edge>
+    <edge source="org.apache.catalina.valves.ExtendedAccessLogValve" target="org.apache.catalina.valves.AbstractAccessLogValve">
+      <point x="65.33333333333331" y="-15.5" />
+      <point x="259.05787037037027" y="941.0" />
+      <point x="395.5" y="941.0" />
+      <point x="395.5" y="630.0" />
+      <point x="321.1805555555555" y="630.0" />
+      <point x="94.875" y="119.0" />
+    </edge>
+    <edge source="org.apache.catalina.valves.JDBCAccessLogValve" target="org.apache.catalina.AccessLog">
+      <point x="63.25" y="-245.5" />
+      <point x="835.5555555555554" y="84.0" />
+      <point x="644.6875" y="84.0" />
+      <point x="79.0625" y="27.0" />
+    </edge>
+    <edge source="my.log.MyAccessLogValve" target="org.apache.catalina.valves.AbstractAccessLogValve">
+      <point x="0.0" y="-15.5" />
+      <point x="305.0" y="630.0" />
+      <point x="257.9305555555555" y="630.0" />
+      <point x="31.625" y="119.0" />
+    </edge>
+    <edge source="org.apache.catalina.valves.AccessLogValve" target="org.apache.catalina.valves.AbstractAccessLogValve">
+      <point x="51.25" y="-130.5" />
+      <point x="153.75" y="630.0" />
+      <point x="194.6805555555555" y="630.0" />
+      <point x="-31.625" y="119.0" />
+    </edge>
+    <edge source="org.apache.catalina.core.AccessLogAdapter" target="org.apache.catalina.AccessLog">
+      <point x="31.625" y="-27.0" />
+      <point x="530.9305555555554" y="94.0" />
+      <point x="549.8125" y="94.0" />
+      <point x="-15.8125" y="27.0" />
+    </edge>
+    <edge source="org.apache.catalina.core.StandardEngine.NoopAccessLog" target="org.apache.catalina.AccessLog">
+      <point x="0.0" y="-27.0" />
+      <point x="1045.3055555555557" y="74.0" />
+      <point x="676.3125" y="74.0" />
+      <point x="110.6875" y="27.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="587.0" y="651.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

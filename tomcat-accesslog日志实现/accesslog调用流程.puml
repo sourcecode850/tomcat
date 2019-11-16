@@ -1,0 +1,13 @@
+@startuml
+
+SocketProcessorBase -> SocketProcessorBase: run()
+SocketProcessorBase -> NioEndpoint: doRun()
+NioEndpoint -> AbstractProtocol: process(SocketProcessorBase, SocketEvent)
+AbstractProtocol -> AbstractProcessorLight: process(SocketProcessorBase, SocketEvent)
+AbstractProcessorLight -> Http11Processor: service(SocketProcessorBase)
+Http11Processor -> CoyoteAdapter: service(coyote.Request, coyote.Response)
+CoyoteAdapter -> ContainerBase: context.logAccess(Request, Response, time)
+ContainerBase -> AbstractAccessLogValve: log(Request, Response, time)
+AbstractAccessLogValve -> MyAccessLogValve: log(CharArrayWriter)
+
+@enduml
