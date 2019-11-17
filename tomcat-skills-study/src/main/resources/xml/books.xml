@@ -1,46 +1,46 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <books
+        xmlns="http://www.tomcat.skills.study/xml/books"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.tomcat.skills.study/xml/books
+                            http://www.tomcat.skills.study/xml/books.xsd"
         id="book-xml-parse-test"
         version="V1">
-    <book name="水浒传">
+    <book bookName="水浒传">
         <author>
-            <name>施耐庵</name>
+            <authorName>施耐庵</authorName>
         </author>
         <creationDate>元末明初</creationDate>
         <byname>
-            <name>水浒</name>
-            <name>忠义水浒传</name>
+            <bynameName>水浒</bynameName>
+            <bynameName>忠义水浒传</bynameName>
         </byname>
         <literaryStyle>小说</literaryStyle>
     </book>
-    <book name="西游记">
+    <book bookName="西游记">
         <author>
-            <name>吴承恩</name>
+            <authorName>吴承恩</authorName>
         </author>
         <creationDate>明朝</creationDate>
         <byname>
-            <name>西游释厄传</name>
+            <bynameName>西游释厄传</bynameName>
         </byname>
-        <literaryStyle>
-            浪漫主义章回体长篇神魔小说
-        </literaryStyle>
+        <literaryStyle>浪漫主义章回体长篇神魔小说</literaryStyle>
     </book>
-    <book name="红楼梦">
+    <book bookName="红楼梦">
         <author>
-            <name>曹雪芹</name>
-            <name>程伟元</name>
-            <name>高鹗</name>
+            <authorName>曹雪芹</authorName>
+            <authorName>程伟元</authorName>
+            <authorName>高鹗</authorName>
         </author>
         <creationDate>18世纪中叶</creationDate>
         <byname>
-            <name>石头记</name>
-            <name>情僧录</name>
-            <name>风月宝鉴</name>
-            <name>金陵十二钗</name>
-            <name>金玉缘</name>
+            <bynameName>石头记</bynameName>
+            <bynameName>情僧录</bynameName>
+            <bynameName>风月宝鉴</bynameName>
+            <bynameName>金陵十二钗</bynameName>
+            <bynameName>金玉缘</bynameName>
         </byname>
-        <literaryStyle>
-            章回体长篇小说
-        </literaryStyle>
+        <literaryStyle>章回体长篇小说</literaryStyle>
     </book>
 </books>

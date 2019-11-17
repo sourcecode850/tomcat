@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xsd:schema
+        xmlns="http://www.tomcat.skills.study/xml/books"
+        targetNamespace="http://www.tomcat.skills.study/xml/books"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <!--它表明来自目标命名空间的特性是否需要用命名空间前缀限定，如果是qualified的话，会导致自定标签属性报错-->
+    <!--attributeFormDefault="unqualified"-->
+    <xsd:element name="books">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element type="Book" name="book" maxOccurs="unbounded" minOccurs="0"/>
+            </xsd:sequence>
+            <xsd:attribute type="xsd:string" name="id"/>
+            <xsd:attribute type="xsd:string" name="version"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="Book">
+        <xsd:sequence>
+            <xsd:element type="Author" name="author"/>
+            <!--简单元素：<creationDate>元末明初</creationDate>-->
+            <xsd:element type="xsd:string" name="creationDate"/>
+            <xsd:element type="Byname" name="byname"/>
+            <xsd:element type="xsd:string" name="literaryStyle"/>
+        </xsd:sequence>
+        <xsd:attribute type="xsd:string" name="bookName"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="Author">
+        <xsd:sequence>
+            <xsd:element type="xsd:string" name="authorName" maxOccurs="unbounded" minOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="Byname">
+        <xsd:sequence>
+            <xsd:element type="xsd:string" name="bynameName" maxOccurs="unbounded" minOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+</xsd:schema>
