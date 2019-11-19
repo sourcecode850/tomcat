@@ -23,7 +23,28 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <!--mac下，这个模块不写resource插件也可以将配置文件从src加载到classpath下，apache-tomcat-8.5.46却不行，诡异-->
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-resources-plugin</artifactId>-->
+                <!--<version>2.5</version>-->
+                <!--<configuration>-->
+                    <!--<encoding>UTF-8</encoding>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
         </plugins>
+
+        <resources>
+            <resource>
+                <!--这里的路径要从项目名跟路径写起-->
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
     </build>
 
     <dependencies>
