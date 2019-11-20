@@ -1,0 +1,30 @@
+@startuml
+AbstractProtocol -> AbstractNioEndpoint: start()
+AbstractNioEndpoint -> AbstractNioEndpoint: bind()
+AbstractNioEndpoint -> NioEndpoint: startInternal()
+NioEndpoint -> NioEndpoint: createExecutor()
+NioEndpoint -> PollerThread: start()
+PollerThread -> Poller: run()
+NioEndpoint -> AcceptorThread: startAcceptorThreads()
+AcceptorThread -> Acceptor: run()
+Acceptor -> ServerSocketChannel: accept()
+ServerSocketChannel --> Acceptor: SocketChannel
+
+' 下面时序图不对，只是方便记录流程；
+' 大概处理流程就是acceptor线程监听请求，将请求封装成PollerEvent事件；
+' Poller线程会调用PollerEvent#run将SocketChannel注册到Selector上，SelectionKey.OP_READ
+' Poller线程接着处理selector.selectedKeys().iterator()，将准备好的SelectionKey调用processKey处理
+' processSocket(),创建createSocketProcessor(socketWrapper, event)，进行处理
+' executor.execute(SocketProcessor)
+' getHandler().process(socketWrapper, SocketEvent.OPEN_READ)
+
+Acceptor -> Acceptor: setSocketOptions(socket)
+Acceptor -> Acceptor: getPoller0().register(channel)
+Acceptor -> Poller: addEvent()
+
+Poller -> PollerEvent: run()
+PollerEvent -> SocketChannel: register(socket.getPoller().getSelector(), SelectionKey.OP_READ, socketWrapper)
+Poller -> Poller: processKey(sk, attachment)
+
+
+@enduml

@@ -276,6 +276,13 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             // Start poller threads
             // 开启 poller 线程， 默认 2
             // 检测到 事件后，交给 processor 处理
+
+            // NioEndpoint#startInternal方法，启动acceptor监听请求，将请求封装成PollerEvent（队列），
+            // poller线程负责处理PollerEvent，先是调用pollerEvent#run方法，注册感兴趣的key
+            // poller接着获取已经准备好的事件，交给SocketProcessorBase处理
+            // SocketProcessorBase 交给ConnectionHandler处理；流程图参见：NioEndpoint处理请求流程图
+
+            // acceptor线程会获取poller对象，poller对象默认2个，采取轮询的方法进行处理；
             pollers = new Poller[getPollerThreadCount()];
             for (int i=0; i<pollers.length; i++) {
                 pollers[i] = new Poller();
@@ -423,7 +430,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 channel.setIOChannel(socket);
                 channel.reset();
             }
-            // 获取 Poller，注册 成 Event 事件
+            // 获取 Poller，注册 成 PollerEvent 事件；
             getPoller0().register(channel);
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
@@ -490,7 +497,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                     SocketChannel socket = null;
                     try {
                         // Accept the next incoming connection from the server
-                        // 接收从server来的下一个socket连接
+                        // 接收从server来的下一个socket连接;Acceptor监听请求，获取SocketChannel
                         socket = serverSock.accept();
                     } catch (IOException ioe) {
                         // We didn't get a socket
@@ -511,7 +518,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                     if (running && !paused) {
                         // setSocketOptions() will hand the socket off to
                         // an appropriate processor if successful
-                        // 把 socket 交给合适的 处理器处理
+                        // 把 socket 交给合适的 处理器处理；注册成PollerEvent事件
                         if (!setSocketOptions(socket)) {
                             closeSocket(socket);
                         }
@@ -605,8 +612,10 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
         @Override
         public void run() {
+            // 如果是注册ops，则将selector注册OP_READ
             if (interestOps == OP_REGISTER) {
                 try {
+                    // 这里开始注册到selector上；read事件，attachment = socketWrapper；答疑L884
                     socket.getIOChannel().register(
                             socket.getPoller().getSelector(), SelectionKey.OP_READ, socketWrapper);
                 } catch (Exception x) {
@@ -720,9 +729,11 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             boolean result = false;
 
             PollerEvent pe = null;
+            // 取出PollEvents事件，进行处理；events是Poller的，acceptor也在使用，这里似乎不需要关注线程安全问题
             for (int i = 0, size = events.size(); i < size && (pe = events.poll()) != null; i++ ) {
                 result = true;
                 try {
+                    // socket.getPoller().getSelector()：SelectionKey的注册感兴趣事件
                     pe.run();
                     pe.reset();
                     if (running && !paused) {
@@ -757,6 +768,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             // 获取pollerEvent
             PollerEvent r = eventCache.pop();
             ka.interestOps(SelectionKey.OP_READ);//this is what OP_REGISTER turns into.
+            // PollerEvent初始为OP_REGISTER事件
             if ( r==null) r = new PollerEvent(socket,ka,OP_REGISTER);
             else r.reset(socket,ka,OP_REGISTER);
             addEvent(r);
@@ -832,8 +844,8 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
                 try {
                     if (!close) {
-                        // 在 Acceptor 收到请求封装成 Socket 注册到 event 中
-                        // 在轮询时从Event中取，进行处理
+                        // 在 Acceptor 收到请求封装成 Socket 注册到 events 中
+                        // 处理所有接受到请求事件PollerEvents，这里会注册selector的SelectKey感兴趣的事件
                         hasEvents = events();
                         if (wakeupCounter.getAndSet(-1) > 0) {
                             //if we are here, means we have other stuff to do
@@ -867,7 +879,9 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 // Walk through the collection of ready keys and dispatch
                 // any active event.
                 while (iterator != null && iterator.hasNext()) {
+                    // 轮询selector，处理已经准备好的事件
                     SelectionKey sk = iterator.next();
+                    // ？？ 这里的sk.attachment为啥是NioSocketWrapper，哪里设置的？？参加NioEndpoint L618行代码
                     NioSocketWrapper attachment = (NioSocketWrapper)sk.attachment();
                     // Attachment may be null if another thread has called
                     // cancelledKey()
@@ -875,7 +889,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                         iterator.remove();
                     } else {
                         iterator.remove();
-                        // 监听到请求则处理
+                        // Poller的监听到请求则处理
                         processKey(sk, attachment);
                     }
                 }//while
@@ -890,7 +904,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
         protected void processKey(SelectionKey sk, NioSocketWrapper attachment) {
             try {
-                // 先是NioEndPoint自己的processKey方法处理
+                // 先是Poller自己的processKey方法处理
                 if ( close ) {
                     cancelledKey(sk);
                 } else if ( sk.isValid() && attachment != null ) {
@@ -902,6 +916,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                             boolean closeSocket = false;
                             // Read goes before write
                             if (sk.isReadable()) {
+                                // AbstractNiopoint中的processSocket()方法
                                 if (!processSocket(attachment, SocketEvent.OPEN_READ, true)) {
                                     closeSocket = true;
                                 }

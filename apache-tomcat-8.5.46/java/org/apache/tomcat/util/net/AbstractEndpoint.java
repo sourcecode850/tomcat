@@ -1069,7 +1069,7 @@ public abstract class AbstractEndpoint<S> {
             if (socketWrapper == null) {
                 return false;
             }
-            // 从 栈中取一个
+            // 从 栈中取一个  Cache for SocketProcessor objects
             SocketProcessorBase<S> sc = processorCache.pop();
             if (sc == null) {
                 // 创建socket处理器
@@ -1080,6 +1080,7 @@ public abstract class AbstractEndpoint<S> {
             }
 
             // 执行socket处理器；可以去SocketProcessorBase的run方法了
+            // Socket处理结束后，会将SocketProcessorBase放回到processorCache缓存中
             Executor executor = getExecutor();
             if (dispatch && executor != null) {
                 executor.execute(sc);
