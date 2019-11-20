@@ -147,6 +147,18 @@
 
       <Host name="localhost"  appBase="webapps"
             unpackWARs="true" autoDeploy="true">
+        <!--给host添加别名，debug下面的代码，验证addAlias方法的时候，会从栈顶拿出Host对象，调用addAlias方法，获取Alias标签值
+          digester.addCallMethod(prefix + "Host/Alias",
+                                "addAlias", 0);
+           注意与下面有参数的方法的对比
+          digester.addCallMethod(fullPrefix + "/context-param",
+                               "addContextParam", 2);
+          // 该方法与addCallMethod配合使用，根据rule指定的标签属性来调用方法
+          digester.addCallParam(fullPrefix + "/context-param/param-name", 0);
+          digester.addCallParam(fullPrefix + "/context-param/param-value", 1);
+        -->
+        <Alias>my-host-alias-1</Alias>
+        <Alias>my-host-alias-2-中文</Alias>
 
         <!-- SingleSignOn valve, share authentication between web applications
              Documentation at: /docs/config/valve.html -->

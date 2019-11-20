@@ -28,3 +28,7 @@ Digester底层采用的是SAX解析方式，通过遍历XML文档规则来进行
 
 digester.book相关代码摘自下文
 https://www.jianshu.com/p/4cdc422b269b
+
+下面这篇博文讲解Digester不错
+Apache Commons Digester 二（规则模块绑定-RulesModule、异步解析-asyncParse、xml变量Substitutor、带参构造方法）
+https://www.cnblogs.com/chenpi/p/6947441.html

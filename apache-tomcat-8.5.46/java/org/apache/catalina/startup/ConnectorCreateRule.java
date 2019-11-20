@@ -61,6 +61,7 @@ public class ConnectorCreateRule extends Rule {
         if ( attributes.getValue("executor")!=null ) {
             ex = svc.getExecutor(attributes.getValue("executor"));
         }
+        // Connector创建规则：而不是简单的；这里 String name参数竟然没用到，原因在于这里肯定是Connector元素了
         Connector con = new Connector(attributes.getValue("protocol"));
         if (ex != null) {
             setExecutor(con, ex);

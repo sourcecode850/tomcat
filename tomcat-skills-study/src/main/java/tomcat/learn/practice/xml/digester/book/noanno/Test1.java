@@ -13,6 +13,8 @@ import java.io.IOException;
  */
 public class Test1 {
 
+    User user = new User();
+
     public static Books parseXml(File xmlFile) throws IOException, SAXException {
         Digester digester = new Digester();
         digester.setValidating(false);
@@ -21,6 +23,9 @@ public class Test1 {
 
         // 将books标签的属性映射到Bookstore对象的属性上
         digester.addSetProperties("books");
+
+//         将books设置给user，让user做最顶级父类
+        digester.addSetNext("books", "setBooks", "tomcat.learn.practice.xml.digester.book.noanno.Books");
 
         // 标签/books/book和Book对象映射
         digester.addObjectCreate("books/book", Book.class);
@@ -60,7 +65,14 @@ public class Test1 {
         digester.addSetNext("books/book/byname/bynameName", "addByname");
         // 把AuthorName标签对象添加到Author对象中，需要保证Author对象中有addAuthorName方法（命名任意，只需要对应上即可），用于添加装载XML标签内容后的对象信息
         digester.addSetNext("books/book/author/authorName", "addAuthorName");
+
+        // 这里push最顶层的User之后，返回的对象就不再是Books了，而是User；所以main方法中打印null
+        User user = new User();
+        digester.push(user);
+
         Object obj = digester.parse(xmlFile);
+        System.out.println(obj);
+
         if (obj instanceof Books) {
             return (Books) obj;
         }

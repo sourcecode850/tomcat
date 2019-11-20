@@ -291,11 +291,22 @@ public class Catalina {
         digester.setFakeAttributes(fakeAttributes);
         digester.setUseContextClassLoader(true);
 
+        // 博文Digester的基本用法：https://blog.csdn.net/shang02/article/details/53258904
+
         // Configure the actions we will be using
+        // 创建Server对象
         digester.addObjectCreate("Server",
                                  "org.apache.catalina.core.StandardServer",
                                  "className");
+        // digester.addSetProperties("database/user"),解析遇到user节点时，会获取键值对 userName=guest,password=guest，
+        // 获得栈顶的UserBean对象，设置实例的userName、password属性；
+
+        // 将配置文件中Server标签属性与栈顶对象（上面创建的Server对象）关联起来，并且将Server标签所有属性映射到Server对象上
+        // 即<Server port="8005" shutdown="SHUTDOWN">映射完成,addSetProperties也会创建SetPropertiesRule，当标签解析到
+        // server的时候，会获取栈顶元素server对象，然后获取server标签的属性port和shutdown，设置给server对象
         digester.addSetProperties("Server");
+        // 调用setServer方法，将Server对象设置给他爹，他爹是Catalina，见代码digester.push(this)，解析xml前一步设置的；
+        // addSetNext规则是，获取digester栈顶层两个元素，但是没有弹出，然后将儿子设置给爹
         digester.addSetNext("Server",
                             "setServer",
                             "org.apache.catalina.Server");
@@ -303,6 +314,7 @@ public class Catalina {
         digester.addObjectCreate("Server/GlobalNamingResources",
                                  "org.apache.catalina.deploy.NamingResourcesImpl");
         digester.addSetProperties("Server/GlobalNamingResources");
+        // 调用Server的setGlobalNamingResources方法，将org.apache.catalina.deploy.NamingResourcesImpl对象设置进去
         digester.addSetNext("Server/GlobalNamingResources",
                             "setGlobalNamingResources",
                             "org.apache.catalina.deploy.NamingResourcesImpl");
@@ -341,7 +353,7 @@ public class Catalina {
                             "addExecutor",
                             "org.apache.catalina.Executor");
 
-
+        // addRule和addObjectCreate相同地方都是创建对象，addObjectCreate会创建ObjectCreateRule，addRule会直接创建特定的**CreateRule
         digester.addRule("Server/Service/Connector",
                          new ConnectorCreateRule());
         digester.addRule("Server/Service/Connector",
@@ -395,7 +407,7 @@ public class Catalina {
                             "addUpgradeProtocol",
                             "org.apache.coyote.UpgradeProtocol");
 
-        // Add RuleSets for nested elements
+        // Add RuleSets for nested elements，会给digester创建一组add**
         digester.addRuleSet(new NamingRuleSet("Server/GlobalNamingResources/"));
         digester.addRuleSet(new EngineRuleSet("Server/Service/"));
         digester.addRuleSet(new HostRuleSet("Server/Service/Engine/"));
@@ -607,6 +619,7 @@ public class Catalina {
 
             try {
                 inputSource.setByteStream(inputStream);
+                // 原来Digester顶层Catalina是这里设置的
                 digester.push(this);
                 digester.parse(inputSource);
             } catch (SAXParseException spe) {

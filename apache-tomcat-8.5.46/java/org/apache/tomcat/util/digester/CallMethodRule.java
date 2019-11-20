@@ -378,7 +378,7 @@ public class CallMethodRule extends Rule {
         // Determine the target object for the method call
         Object target;
         if (targetOffset >= 0) {
-            target = digester.peek(targetOffset);
+            target = digester.peek(targetOffset);// 栈顶拿出对象，调用改对象的方法
         } else {
             target = digester.peek( digester.getCount() + targetOffset );
         }

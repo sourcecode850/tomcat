@@ -197,8 +197,11 @@ public class WebRuleSet extends RuleSetBase {
                     new SetDenyUncoveredHttpMethodsRule());
         }
 
+        // 该方法同样设置对象的属性，但更加灵活，不需要对象具有setter;
+        // 根据rule规则指定的属性，调用对象的methodName方法，paraNumber参数是表示方法需要的参数个数，当paraNumber=0时，可以单独使用，不然需要配合addCallParam方法
         digester.addCallMethod(fullPrefix + "/context-param",
                                "addContextParam", 2);
+        // 该方法与addCallMethod配合使用，根据rule指定的标签属性来调用方法
         digester.addCallParam(fullPrefix + "/context-param/param-name", 0);
         digester.addCallParam(fullPrefix + "/context-param/param-value", 1);
 

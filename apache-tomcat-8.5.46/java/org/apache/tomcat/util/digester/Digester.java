@@ -1475,6 +1475,7 @@ public class Digester extends DefaultHandler2 {
         InputSource input = new InputSource(new FileInputStream(file));
         input.setSystemId("file://" + file.getAbsolutePath());
         getXMLReader().parse(input);
+        // 这里直接返回root对象，Catalina中创建的digester返回的则是Catalina类型对象
         return root;
     }
 

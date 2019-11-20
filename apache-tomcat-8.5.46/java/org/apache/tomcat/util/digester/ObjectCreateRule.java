@@ -130,7 +130,7 @@ public class ObjectCreateRule extends Rule {
      */
     @Override
     public void end(String namespace, String name) throws Exception {
-
+        // 对象创建成功后，才会弹出
         Object top = digester.pop();
         if (digester.log.isDebugEnabled()) {
             digester.log.debug("[ObjectCreateRule]{" + digester.match +

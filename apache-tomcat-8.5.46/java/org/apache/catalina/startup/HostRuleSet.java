@@ -96,7 +96,8 @@ public class HostRuleSet extends RuleSetBase {
         digester.addSetNext(prefix + "Host",
                             "addChild",
                             "org.apache.catalina.Container");
-
+        // 该方法同样设置对象的属性，但更加灵活，不需要对象具有setter
+        // Host添加Alias,调用当前top object的Host函数，参数个数为0,addCallMethod与addBeanPropertySetter方法等价
         digester.addCallMethod(prefix + "Host/Alias",
                                "addAlias", 0);
 
