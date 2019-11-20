@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import org.apache.catalina.Executor;
 import org.apache.catalina.Service;
 import org.apache.catalina.connector.Connector;
+import org.apache.coyote.AbstractProtocol;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.IntrospectionUtils;
@@ -58,7 +59,9 @@ public class ConnectorCreateRule extends Rule {
             throws Exception {
         Service svc = (Service)digester.peek();
         Executor ex = null;
+        // Server.xml中的my-test-catalina-exec-在这里设置的，解析xml
         if ( attributes.getValue("executor")!=null ) {
+            // 从service中取出来的，service解析时候可能存在多个线程池，可以实现不同connectord的共享，也可以实现独享，就看配置connector如何引用线程池了
             ex = svc.getExecutor(attributes.getValue("executor"));
         }
         // Connector创建规则：而不是简单的；这里 String name参数竟然没用到，原因在于这里肯定是Connector元素了
@@ -74,6 +77,7 @@ public class ConnectorCreateRule extends Rule {
     }
 
     private static void setExecutor(Connector con, Executor ex) throws Exception {
+        // 这么骚气的setExecutor方法哇;强制类型转换后再设置不也可以的哇((AbstractProtocol)con.getProtocolHandler()).setExecutor(ex);
         Method m = IntrospectionUtils.findMethod(con.getProtocolHandler().getClass(),"setExecutor",new Class[] {java.util.concurrent.Executor.class});
         if (m!=null) {
             m.invoke(con.getProtocolHandler(), new Object[] {ex});

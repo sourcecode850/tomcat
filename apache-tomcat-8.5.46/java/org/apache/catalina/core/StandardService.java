@@ -422,7 +422,8 @@ public class StandardService extends LifecycleMBeanBase implements Service {
                 engine.start();
             }
         }
-
+        // server.xml中配置的线程池是StandardThreadExecutor，在这里初始化，初始化之前executor还是null；StandardThreadExecutor与ThreadPoolExecutor组合
+        // StandardThreadExecutor负责线程池核心配置，ThreadPoolExecutor真正完成线程池功能
         synchronized (executors) {
             for (Executor executor: executors) {
                 executor.start();

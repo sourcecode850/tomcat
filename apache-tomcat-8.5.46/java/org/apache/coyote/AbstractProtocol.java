@@ -233,6 +233,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
 
     @Override
     public Executor getExecutor() { return endpoint.getExecutor(); }
+    // 这里设置到endpoint
     public void setExecutor(Executor executor) {
         endpoint.setExecutor(executor);
     }

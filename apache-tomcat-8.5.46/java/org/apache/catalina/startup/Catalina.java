@@ -356,6 +356,7 @@ public class Catalina {
         // addRule和addObjectCreate相同地方都是创建对象，addObjectCreate会创建ObjectCreateRule，addRule会直接创建特定的**CreateRule
         digester.addRule("Server/Service/Connector",
                          new ConnectorCreateRule());
+        // 这里设置Connector的属性，除了executor和sslImplementationName；有URIEncoding等属性的设置
         digester.addRule("Server/Service/Connector",
                          new SetAllPropertiesRule(new String[]{"executor", "sslImplementationName"}));
         digester.addSetNext("Server/Service/Connector",

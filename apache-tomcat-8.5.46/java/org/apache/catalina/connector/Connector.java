@@ -314,6 +314,9 @@ public class Connector extends LifecycleMBeanBase  {
         if (replacements.get(name) != null) {
             repl = replacements.get(name);
         }
+        // 配置在connector中的属性值，经过replacements转换，都设置给了protocolHandler，比如connectionTimeout =》 soTimeout
+        // 而有些被protocolHandler设置给了endpoint.setPort(port)，比如port
+        // 有些则是被自己使用了，比如redirectPort
         return IntrospectionUtils.setProperty(protocolHandler, repl, value);
     }
 

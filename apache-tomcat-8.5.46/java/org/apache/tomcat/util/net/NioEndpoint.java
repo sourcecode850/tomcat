@@ -266,6 +266,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             nioChannels = new SynchronizedStack<>(SynchronizedStack.DEFAULT_SIZE,
                     socketProperties.getBufferPool());
 
+            // 如果Server.xml配置文件中配置了tomcatThreadPool，那么在解析配置文件，创建Connector对象的时候，就会将线程池设置到Endpoint中，这里则不会null了
             // Create worker collection
             if ( getExecutor() == null ) {
                 createExecutor();
