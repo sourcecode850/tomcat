@@ -100,6 +100,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
     public AbstractProtocol(AbstractEndpoint<S> endpoint) {
         this.endpoint = endpoint;
         setSoLinger(Constants.DEFAULT_CONNECTION_LINGER);
+        // 设置TCP_NO_DELAY
         setTcpNoDelay(Constants.DEFAULT_TCP_NO_DELAY);
     }
 
@@ -320,6 +321,17 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
     public int getSoTimeout() {
         return getConnectionTimeout();
     }
+
+    /**
+     * 具体查看Connector的replacements
+     * 这里设置connectionTimeout到endpoint，最终体现在SocketProperties中了
+     * 设置soTimeout
+     *  <Connector executor="tomcatThreadPool"
+     *                port="8080" protocol="HTTP/1.1"
+     *                connectionTimeout="22222"
+     *                redirectPort="8443" URIEncoding="UTF-8"/>
+     * @param timeout
+     */
     @Deprecated
     public void setSoTimeout(int timeout) {
         setConnectionTimeout(timeout);

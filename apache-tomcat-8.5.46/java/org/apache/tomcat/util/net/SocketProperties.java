@@ -137,6 +137,13 @@ public class SocketProperties {
 
     /**
      * SO_TIMEOUT option. default is 20000.
+     * 这里的soTimeout的值可以在sever.xml文件中配置，也就是connectionTimeout
+     *
+     * <Connector executor="tomcatThreadPool"
+     *                port="8080" protocol="HTTP/1.1"
+     *                connectionTimeout="22222"
+     *                redirectPort="8443" URIEncoding="UTF-8"/>
+     *
      */
     protected Integer soTimeout = Integer.valueOf(20000);
 
@@ -202,6 +209,7 @@ public class SocketProperties {
             socket.setSoTimeout(soTimeout.intValue());
         if (tcpNoDelay != null) {
             try {
+                // Socket编程模型会有一个预留接口来禁用Nigle算法，这个接口就是TCP_NO_DELAY
                 socket.setTcpNoDelay(tcpNoDelay.booleanValue());
             } catch (SocketException e) {
                 // Some socket types may not support this option which is set by default

@@ -412,6 +412,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             // 设置 非阻塞模式
             socket.configureBlocking(false);
             Socket sock = socket.socket();
+            // 设置socket的相关属性参数
             socketProperties.setProperties(sock);
             // SocketChannel转化为NioChannel
             NioChannel channel = nioChannels.pop();

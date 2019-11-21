@@ -73,7 +73,7 @@
     <!--这里只有8080端口的Connector用到了外部的线程池tomcatThreadPool-->
     <Connector executor="tomcatThreadPool"
                port="8080" protocol="HTTP/1.1"
-               connectionTimeout="20000"
+               connectionTimeout="22222"
                redirectPort="8443" URIEncoding="UTF-8"/>
 
     <!-- Define an SSL/TLS HTTP/1.1 Connector on port 8443

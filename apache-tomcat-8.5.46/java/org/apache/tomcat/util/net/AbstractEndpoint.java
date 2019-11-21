@@ -183,6 +183,10 @@ public abstract class AbstractEndpoint<S> {
 
     /**
      * Socket properties
+     *
+     * SocketProperties存在于AbstractEndponit中，AbstractEndponit存在于AbstractProtocol（ProtocolHandler类型）中
+     *
+     * Connector会持有AbstractProtocol，然后从server.xml中取值，设置到socketProperties中
      */
     protected SocketProperties socketProperties = new SocketProperties();
     public SocketProperties getSocketProperties() {
@@ -1064,6 +1068,8 @@ public abstract class AbstractEndpoint<S> {
      *                          container thread
      *
      * @return if processing was triggered successfully
+     *
+     * 分析socket处理，从这里开始处理socket：
      */
     public boolean processSocket(SocketWrapperBase<S> socketWrapper,
             SocketEvent event, boolean dispatch) {
