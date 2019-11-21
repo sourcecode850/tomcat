@@ -116,10 +116,15 @@ public class StandardThreadExecutor extends LifecycleMBeanBase
     @Override
     protected void startInternal() throws LifecycleException {
 
+        // 装饰者：包装ThreadPoolExecutor
+
+        // 创建tomcat自己的线程池，参见AbstractEndpoint#createExecutor
         taskqueue = new TaskQueue(maxQueueSize);
         TaskThreadFactory tf = new TaskThreadFactory(namePrefix,daemon,getThreadPriority());
         executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), maxIdleTime, TimeUnit.MILLISECONDS,taskqueue, tf);
         executor.setThreadRenewalDelay(threadRenewalDelay);
+
+        // 这里好像有点多余；创建ThreadPoolExecutor的时候，默认提前启动核心线程了
         if (prestartminSpareThreads) {
             executor.prestartAllCoreThreads();
         }

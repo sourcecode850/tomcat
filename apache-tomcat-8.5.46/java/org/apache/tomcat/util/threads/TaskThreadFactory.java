@@ -26,6 +26,7 @@ import org.apache.tomcat.util.security.PrivilegedSetTccl;
 /**
  * Simple task thread factory to use to create threads for an executor
  * implementation.
+ * 这个线程创建工厂比DefaultThreadFactory创建的线程多个时间，可以自定义线程名
  */
 public class TaskThreadFactory implements ThreadFactory {
 
@@ -45,6 +46,7 @@ public class TaskThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(Runnable r) {
+        // 比Thread多了creationTime；创建的线程多个创建时间
         TaskThread t = new TaskThread(group, r, namePrefix + threadNumber.getAndIncrement());
         t.setDaemon(daemon);
         t.setPriority(threadPriority);

@@ -66,6 +66,8 @@ public class TaskQueue extends LinkedBlockingQueue<Runnable> {
 
     @Override
     public boolean offer(Runnable o) {
+        // 这里似乎干了线程池本身的活啊，如果线程池的任务队列是有界的话；
+        // 但是这里用的是无届的队列，所以需要手动实现offer功能；这个无界的好处在于，线程池数量达到MaximumPoolSize后，还是可以继续添加任务的
       //we can't do any checks
         if (parent==null) return super.offer(o);
         //we are maxed out on threads, simply queue the object
@@ -86,6 +88,7 @@ public class TaskQueue extends LinkedBlockingQueue<Runnable> {
         if (runnable == null && parent != null) {
             // the poll timed out, it gives an opportunity to stop the current
             // thread if needed to avoid memory leaks.
+            // 这里判断是需要终止当前线程，通过抛异常方式终止；查看JDK的ThreadPoolExecutor#Worker#run可以看到
             parent.stopCurrentThreadIfNeeded();
         }
         return runnable;
@@ -93,16 +96,21 @@ public class TaskQueue extends LinkedBlockingQueue<Runnable> {
 
     @Override
     public Runnable take() throws InterruptedException {
+        // 获取任务，设置超时时间为线程池的getKeepAliveTime时间
+        // 如果当前线程是需要更新的，即renew时间大于等于0，且创建时间小于lastContextStoppedTime
         if (parent != null && parent.currentThreadShouldBeStopped()) {
+            // 调用了这个方法，会在keepAliveTime时间内获取任务，如果没有获取到，则说明线程数目过多了，需要终止当前线程了；
             return poll(parent.getKeepAliveTime(TimeUnit.MILLISECONDS),
                     TimeUnit.MILLISECONDS);
             // yes, this may return null (in case of timeout) which normally
             // does not occur with take()
             // but the ThreadPoolExecutor implementation allows this
         }
+        // 不需要更新，直接调父类take()方法，会阻塞的；
         return super.take();
     }
 
+    // 剩余容量，强制设置成0，用意何在？？？
     @Override
     public int remainingCapacity() {
         if (forcedRemainingCapacity != null) {

@@ -21,7 +21,7 @@ import org.apache.juli.logging.LogFactory;
 
 /**
  * A Thread implementation that records the time at which it was created.
- *
+ *  相比于jdk的Thread，增加了创建时间
  */
 public class TaskThread extends Thread {
 
@@ -49,6 +49,8 @@ public class TaskThread extends Thread {
     /**
      * Wraps a {@link Runnable} to swallow any {@link StopPooledThreadException}
      * instead of letting it go and potentially trigger a break in a debugger.
+     *
+     * 防止eclipse-debug跑出异常StopPooledThreadException，导致无法继续，因此这里对jdk的Runnable进行了封装
      */
     private static class WrappingRunnable implements Runnable {
         private Runnable wrappedRunnable;

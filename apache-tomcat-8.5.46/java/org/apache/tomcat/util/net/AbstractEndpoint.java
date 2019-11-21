@@ -891,7 +891,9 @@ public abstract class AbstractEndpoint<S> {
 
     public void createExecutor() {
         internalExecutor = true;
+        // 创建线程，与StandardThreadExecutor#startInternal一样哦
         TaskQueue taskqueue = new TaskQueue();
+        // 如果不使用server.xml中配置的线程池，则在Endpoint会使用自己创建的线程池
         TaskThreadFactory tf = new TaskThreadFactory(getName() + "-exec-", daemon, getThreadPriority());
         executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), 60, TimeUnit.SECONDS,taskqueue, tf);
         taskqueue.setParent( (ThreadPoolExecutor) executor);
@@ -1082,6 +1084,7 @@ public abstract class AbstractEndpoint<S> {
             // 执行socket处理器；可以去SocketProcessorBase的run方法了
             // Socket处理结束后，会将SocketProcessorBase放回到processorCache缓存中
             Executor executor = getExecutor();
+            // tomcat线程池执行的任务是：SocketProcessorBase类型的哦；
             if (dispatch && executor != null) {
                 executor.execute(sc);
             } else {

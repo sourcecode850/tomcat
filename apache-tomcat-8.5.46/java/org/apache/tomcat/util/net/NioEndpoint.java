@@ -1556,6 +1556,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 socket.getPoller().cancelledKey(key);
             } catch (VirtualMachineError vme) {
                 ExceptionUtils.handleThrowable(vme);
+                // 如果线程会中断：这里会捕获异常的
             } catch (Throwable t) {
                 log.error("", t);
                 socket.getPoller().cancelledKey(key);
