@@ -680,7 +680,7 @@ public class Http11Processor extends AbstractProcessor {
             // Parsing the request header
             // 解析request请求头
             try {
-                if (!inputBuffer.parseRequestLine(keptAlive)) {
+                if (!inputBuffer.parseRequestLine(keptAlive)) {//   读数据，解析请求行
                     if (inputBuffer.getParsingRequestLinePhase() == -1) {
                         return SocketState.UPGRADING;
                     } else if (handleIncompleteRequestLineRead()) {
@@ -734,7 +734,7 @@ public class Http11Processor extends AbstractProcessor {
                 setErrorState(ErrorState.CLOSE_CLEAN, t);
             }
 
-            // Has an upgrade been requested?
+            // Has an upgrade been requested?  可以看到各种请求头信息
             Enumeration<String> connectionValues = request.getMimeHeaders().values("Connection");
             boolean foundUpgrade = false;
             while (connectionValues.hasMoreElements() && !foundUpgrade) {
@@ -786,6 +786,7 @@ public class Http11Processor extends AbstractProcessor {
                 }
             }
 
+            // 如果最大keepAlive请求数是1或者超过或者剩下的次数不大于0了
             if (maxKeepAliveRequests == 1) {
                 keepAlive = false;
             } else if (maxKeepAliveRequests > 0 &&

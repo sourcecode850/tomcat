@@ -592,7 +592,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
         return new SocketProcessor(socketWrapper, event);
     }
 
-
+    // 关闭NioChannel
     private void close(NioChannel socket, SelectionKey key) {
         try {
             if (socket.getPoller().cancelledKey(key) != null) {
@@ -791,7 +791,8 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             NioSocketWrapper ka = new NioSocketWrapper(socket, NioEndpoint.this);
             socket.setSocketWrapper(ka);
             ka.setPoller(this);
-            ka.setReadTimeout(getSocketProperties().getSoTimeout());
+            ka.setReadTimeout(getSocketProperties().getSoTimeout());// 设置读写超时时间，会不会抛异常的哇？
+            // 设置socket的各种属性，超时时间与最大数据传输次数
             ka.setWriteTimeout(getSocketProperties().getSoTimeout());
             ka.setKeepAliveLeft(NioEndpoint.this.getMaxKeepAliveRequests());
             ka.setSecure(isSSLEnabled());
@@ -823,7 +824,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 // connections are shut down cleanly.
                 if (ka != null) {
                     try {
-                        ka.getSocket().close(true);
+                        ka.getSocket().close(true);// 关闭socket
                     } catch (Exception e){
                         if (log.isDebugEnabled()) {
                             log.debug(sm.getString(
@@ -961,6 +962,14 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                      *
                      *  SocketProcessor#doRun()方法，判断event == SocketEvent.ERRORG ==》handshake = -1 ==》close(socket, key)
                      *
+                     *
+                     *  分析：超时处理，因为如果不抛异常的话，链接默认一致开启，除非超时。
+                     *  timeout(keyCount,hasEvents);
+                     *
+                     *  给socket设置读或者写超时时间：
+                     *  register注册PollerEvent的时候有设置超时，Http11InputBuffer时候再次设置超时
+                     *  检查超时：在下面的timeout(keyCount,hasEvents)中检查超时情况
+                     *
                      */
 
                     // Attachment may be null if another thread has called
@@ -969,7 +978,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                         iterator.remove();
                     } else {
                         iterator.remove();
-                        // Poller的监听到请求则处理
+                        // Poller的监听到请求则处理; 这里面也会有cancelKey处理
                         processKey(sk, attachment);
                     }
                 }//while
@@ -1144,7 +1153,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             sk.interestOps(intops);
             attachment.interestOps(intops);
         }
-
+        // 这里处理超时socket
         protected void timeout(int keyCount, boolean hasEvents) {
             long now = System.currentTimeMillis();
             // This method is called on every loop of the Poller. Don't process
@@ -1154,6 +1163,9 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             // - the selector simply timed out (suggests there isn't much load)
             // - the nextExpiration time has passed
             // - the server socket is being closed
+
+            // 不必每个poller循环都处理超时，因为需要几秒的时间去创建大量的负载，超时时间能撑住这几秒；
+            // 但是如果socket正在关闭，即必须需要处理超时了
             if (nextExpiration > 0 && (keyCount > 0 || hasEvents) && (now < nextExpiration) && !close) {
                 return;
             }
@@ -1175,6 +1187,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                             boolean isTimedOut = false;
                             // Check for read timeout
                             if ((ka.interestOps() & SelectionKey.OP_READ) == SelectionKey.OP_READ) {
+                                // 检查超时，注意设置超时时间：Http11InputBuffer代码中parseRequestLine=》wrapper.setReadTimeout(wrapper.getEndpoint().getKeepAliveTimeout())
                                 long delta = now - ka.getLastRead();
                                 long timeout = ka.getReadTimeout();
                                 isTimedOut = timeout > 0 && delta > timeout;
@@ -1188,6 +1201,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                             if (isTimedOut) {
                                 key.interestOps(0);
                                 ka.interestOps(0); //avoid duplicate timeout calls
+                                // 设置超时异常SocketTimeoutException
                                 ka.setError(new SocketTimeoutException());
                                 if (!processSocket(ka, SocketEvent.ERROR, true)) {
                                     cancelledKey(key);
@@ -1349,7 +1363,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 if (log.isDebugEnabled()) {
                     log.debug("Socket: [" + this + "], Read into buffer: [" + nRead + "]");
                 }
-                updateLastRead();
+                updateLastRead();//更新最后一次读操作的时间
 
                 // Fill as much of the remaining byte array as possible with the
                 // data that was just read

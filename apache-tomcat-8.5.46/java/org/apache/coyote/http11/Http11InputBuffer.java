@@ -363,6 +363,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                     if (keptAlive) {
                         // Haven't read any request data yet so use the keep-alive
                         // timeout.
+                        // 设置读超时，如果没有收到过数据，则使用KeepAliveTimeout；实际上由于没有设置keepalivetime，最终用的还是getConnectionTimeout()
                         wrapper.setReadTimeout(wrapper.getEndpoint().getKeepAliveTimeout());
                     }
                     if (!fill(false)) {
@@ -372,6 +373,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                     }
                     // At least one byte of the request has been received.
                     // Switch to the socket timeout.
+                    // 如果已经收到过数据，则使用soTimeout
                     wrapper.setReadTimeout(wrapper.getEndpoint().getConnectionTimeout());
                 }
                 if (!keptAlive && byteBuffer.position() == 0 && byteBuffer.limit() >= CLIENT_PREFACE_START.length - 1) {
@@ -734,7 +736,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
             byteBuffer.position(byteBuffer.limit());
         }
         byteBuffer.limit(byteBuffer.capacity());
-        int nRead = wrapper.read(block, byteBuffer);
+        int nRead = wrapper.read(block, byteBuffer);// 更新读操作的时间
         byteBuffer.limit(byteBuffer.position()).reset();
         if (nRead > 0) {
             return true;
