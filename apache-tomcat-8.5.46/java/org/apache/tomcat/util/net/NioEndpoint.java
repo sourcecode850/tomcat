@@ -522,6 +522,36 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                         // an appropriate processor if successful
                         // 把 socket 交给合适的 处理器处理；注册成PollerEvent事件
                         if (!setSocketOptions(socket)) {
+                            // TODO setSocketOptions(socket)注册成PollerEvent事件成功的话，则不会关闭socket，也就是保持链接状态？
+                            // Socket长连接和短连接的区别：https://www.cnblogs.com/liuqiyun/p/9225209.html
+                            /**
+                             * 短连接
+                             *
+                             * 连接->传输数据->关闭连接
+                             *
+                             * HTTP是无状态的，浏览器和服务器每进行一次HTTP操作，就建立一次连接，但任务结束后就中断连接。
+                             * 短连接是指SOCKET连接后发送后接收完数据后马上断开连接。
+                             *
+                             * 长连接
+                             *
+                             * 连接->传输数据->保持连接->传输数据->....->关闭连接
+                             *
+                             * 长连接指建立SOCKET连接后不管是否使用都保持连接，但安全性较差。
+                             *
+                             * http的长连接
+                             *
+                             * HTTP也可以建立长连接的，使用Connection:keep-alive,HTTP1.1默认进行持久连接。HTTP1.1和HTTP1.0相比较而言，
+                             * 最大的区别就是增加了持久连接支持，但还是无状态的，或者说是不可以信任的
+                             */
+
+                            /**
+                             * TCP本身没有什么长连接/短连接. 只是HTTP创建TCP连接后, 一次通信结束后是否立刻调用 socket.close()关闭TCP连接.
+                             * 如是则我们称呼为HTTP短连接.
+                             * 如果HTTP创建TCP连接后, 可多次利用TCP通道进行HTTP协议的通信,而非一次通信就立刻关闭TCP连接,
+                             * 这种使用方式我们称呼为HTTP长连接/持久连接. 长连接的好处是省去了创建连接的耗时。
+                             *
+                             * 现在分析，socket什么时候关闭，以及如何复用与关闭
+                             */
                             closeSocket(socket);
                         }
                     } else {
@@ -885,6 +915,38 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                     SelectionKey sk = iterator.next();
                     // ？？ 这里的sk.attachment为啥是NioSocketWrapper，哪里设置的？？参加NioEndpoint L618行代码
                     NioSocketWrapper attachment = (NioSocketWrapper)sk.attachment();
+
+                    /**
+                     *
+                     * socket复用：参考之前我的GitHub上的一个自己实现http写的demo：
+                     * https://github.com/niepugithub/java_foundation_enhancement/blob/master/my_http/src/com/pu/nie/HttpServer.java
+                     *
+                     * 以前没留意，可以看到handleRead()方法最后面有一个SocketChannel.close()方法，也就是说，之前的socket读了一次请求数据后就断开链接了
+                     * 显然，这是短链接；模拟tomcat复用socket可以实现长链接；
+                     * 复用也就是要做到读完一次客户端请求数据后，服务端需要将socket再次设置到SelectionKey.OP_READ
+                     *
+                     * 源码分析：倒述
+                     *
+                     * Http11Processor#SocketState service(SocketWrapperBase<?>)  return SocketState.OPEN，意味着读完毕的socket重置为open
+                     * AbstractProcessLight#SocketState process(SocketWrapperBase<?>, SocketEvent)
+                     *
+                     * AsbtractProtocol#SocketState process(SocketWrapperBase<S>, SocketEvent ) 这里面有重要代码：
+                     * (state == SocketState.OPEN) {
+                     *    // In keep-alive but between requests. OK to recycle
+                     *    // processor. Continue to poll for the next request.
+                     *    connections.remove(socket);
+                     *    release(processor);
+                     *    wrapper.registerReadInterest();
+                     * }
+                     *  继续跟踪wrapper.registerReadInterest()即：
+                     *  NioEndpoint#NioSocketWrapper.getPoller().add(getSocket(), SelectionKey.OP_READ)
+                     *  将socket添加到PollerEvents中，状态还是SelectionKey.OP_READ
+                     *
+                     *  下次：Poller线程会轮询PollerEvent，socket得到复用
+                     *
+                     *
+                     */
+
                     // Attachment may be null if another thread has called
                     // cancelledKey()
                     if (attachment == null) {
@@ -919,6 +981,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                             // Read goes before write
                             if (sk.isReadable()) {
                                 // AbstractNiopoint中的processSocket()方法
+                                // TODO 如果processSocket成功，也不会closeSocket，也就是保持长链接了
                                 if (!processSocket(attachment, SocketEvent.OPEN_READ, true)) {
                                     closeSocket = true;
                                 }

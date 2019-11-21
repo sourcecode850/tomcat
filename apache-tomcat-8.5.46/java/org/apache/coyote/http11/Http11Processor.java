@@ -884,6 +884,7 @@ public class Http11Processor extends AbstractProcessor {
                 return SocketState.SENDFILE;
             } else {
                 if (openSocket) {
+                    // 这里实现socket的复用：将已经读完毕的socket重置到SocketState.OPEN状态
                     if (readComplete) {
                         return SocketState.OPEN;
                     } else {
