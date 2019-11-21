@@ -945,6 +945,22 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                      *  下次：Poller线程会轮询PollerEvent，socket得到复用
                      *
                      *
+                     *  下面接着分析：socket异常关闭 倒述
+                     *  Http11Processor#SocketState service(SocketWrapperBase<?>) 选择一个分析即可
+                     *  if(keepAlive && !getErrorState().isError() && !isAsync() &&
+                     *          statusDropsConnection(response.getStatus())) {
+                     *      // 分析socket异常关闭的情形：
+                     *      setErrorState(ErrorState.CLOSE_CLEAN, null);
+                     *  }
+                     *
+                     *  AbstractProcessor#setErrorState(ErrorState, Throwable)
+                     *  AbstractProcessor#processSocketEvent(SocketEvent.ERROR, true);
+                     *  socketWrapper.processSocket(SocketEvent.ERROR, true);
+                     *  endpoint.processSocket(socketWrapper, socketStatus, dispatch)
+                     *  executor.execute(sc) 交给线程池执行
+                     *
+                     *  SocketProcessor#doRun()方法，判断event == SocketEvent.ERRORG ==》handshake = -1 ==》close(socket, key)
+                     *
                      */
 
                     // Attachment may be null if another thread has called

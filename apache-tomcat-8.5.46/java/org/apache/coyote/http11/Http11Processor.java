@@ -807,6 +807,7 @@ public class Http11Processor extends AbstractProcessor {
                     // committed, so we can't try and set headers.
                     if(keepAlive && !getErrorState().isError() && !isAsync() &&
                             statusDropsConnection(response.getStatus())) {
+                        // 分析socket异常关闭的情形：
                         setErrorState(ErrorState.CLOSE_CLEAN, null);
                     }
                 } catch (InterruptedIOException e) {
