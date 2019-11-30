@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.apache.coyote.http11.Http11Processor</OriginalElement>
+  <nodes>
+    <node x="13.5" y="243.0">org.apache.coyote.http11.Http11NioProtocol</node>
+    <node x="32.5" y="319.0">org.apache.tomcat.util.net.AbstractEndpoint.Handler</node>
+    <node x="245.0" y="162.0">org.apache.coyote.AbstractProcessor</node>
+    <node x="0.0" y="400.0">org.apache.coyote.AbstractProtocol.ConnectionHandler</node>
+    <node x="0.0" y="476.0">org.apache.coyote.Adapter</node>
+    <node x="0.0" y="162.0">org.apache.coyote.http11.AbstractHttp11Protocol</node>
+    <node x="401.0" y="319.0">org.apache.catalina.connector.Connector</node>
+    <node x="219.5" y="400.0">org.apache.tomcat.util.net.NioEndpoint</node>
+    <node x="20.5" y="0.0">org.apache.coyote.ProtocolHandler</node>
+    <node x="249.5" y="243.0">org.apache.coyote.http11.Http11Processor</node>
+    <node x="19.5" y="81.0">org.apache.coyote.AbstractProtocol</node>
+    <node x="269.0" y="0.0">org.apache.coyote.Processor</node>
+    <node x="231.0" y="81.0">org.apache.coyote.AbstractProcessorLight</node>
+    <node x="206.0" y="319.0">org.apache.tomcat.util.net.AbstractEndpoint</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.apache.coyote.AbstractProtocol" target="org.apache.coyote.ProtocolHandler">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.coyote.AbstractProtocol.ConnectionHandler" target="org.apache.tomcat.util.net.AbstractEndpoint.Handler">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.tomcat.util.net.NioEndpoint" target="org.apache.tomcat.util.net.AbstractEndpoint">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.coyote.http11.AbstractHttp11Protocol" target="org.apache.coyote.AbstractProtocol">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.coyote.AbstractProcessorLight" target="org.apache.coyote.Processor">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.coyote.http11.Http11NioProtocol" target="org.apache.coyote.http11.AbstractHttp11Protocol">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.coyote.AbstractProcessor" target="org.apache.coyote.AbstractProcessorLight">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.coyote.http11.Http11Processor" target="org.apache.coyote.AbstractProcessor">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="503.0" y="247.0" />
+  <SelectedNodes>
+    <node>org.apache.coyote.AbstractProtocol.ConnectionHandler</node>
+  </SelectedNodes>
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
