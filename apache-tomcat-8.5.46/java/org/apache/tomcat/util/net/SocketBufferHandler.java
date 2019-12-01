@@ -19,7 +19,7 @@ package org.apache.tomcat.util.net;
 import java.nio.ByteBuffer;
 
 import org.apache.tomcat.util.buf.ByteBufferUtils;
-
+// 这个类干嘛用的，暂时没明白
 public class SocketBufferHandler {
 
     private volatile boolean readBufferConfiguredForWrite = true;

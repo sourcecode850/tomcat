@@ -416,7 +416,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             socketProperties.setProperties(sock);
             // SocketChannel转化为NioChannel
             NioChannel channel = nioChannels.pop();
-            if (channel == null) {
+            if (channel == null) {// socketBufferHandler， The buffers used for communicating with the socket
                 SocketBufferHandler bufhandler = new SocketBufferHandler(
                         socketProperties.getAppReadBufSize(),
                         socketProperties.getAppWriteBufSize(),
@@ -1245,7 +1245,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
         public NioSocketWrapper(NioChannel channel, NioEndpoint endpoint) {
             super(channel, endpoint);
-            pool = endpoint.getSelectorPool();
+            pool = endpoint.getSelectorPool();// socketBufferHandler
             socketBufferHandler = channel.getBufHandler();
         }
 
@@ -1356,7 +1356,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 if (log.isDebugEnabled()) {
                     log.debug("Socket: [" + this + "], Read direct from socket: [" + nRead + "]");
                 }
-                updateLastRead();
+                updateLastRead();// 更新最后一次读数据的时间
             } else {
                 // Fill the read buffer as best we can.
                 nRead = fillReadBuffer(block);
@@ -1392,7 +1392,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             return fillReadBuffer(block, socketBufferHandler.getReadBuffer());
         }
 
-
+        // 读取数据到ByteBuffer中
         private int fillReadBuffer(boolean block, ByteBuffer to) throws IOException {
             int nRead;
             NioChannel channel = getSocket();
@@ -1415,7 +1415,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                         pool.put(selector);
                     }
                 }
-            } else {
+            } else {// 真正读取数据
                 nRead = channel.read(to);
                 if (nRead == -1) {
                     throw new EOFException();

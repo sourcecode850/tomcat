@@ -366,24 +366,41 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                         // 设置读超时，如果没有收到过数据，则使用KeepAliveTimeout；实际上由于没有设置keepalivetime，最终用的还是getConnectionTimeout()
                         wrapper.setReadTimeout(wrapper.getEndpoint().getKeepAliveTimeout());
                     }
+                    // 这里解析请求数据，放入到btyeBuffer中
                     if (!fill(false)) {
                         // A read is pending, so no longer in initial state
                         parsingRequestLinePhase = 1;
                         return false;
                     }
+
+// new String(byteBuffer.array())得到下面的一些请求信息
+// GET / HTTP/1.1
+// Host: localhost:8080
+// Connection: keep-alive
+// Cache-Control: max-age=0
+// Upgrade-Insecure-Requests: 1
+// User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36
+// Sec-Fetch-User: ?1
+// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3
+// Sec-Fetch-Site: none
+// Sec-Fetch-Mode: navigate
+// Accept-Encoding: gzip, deflate, br
+// Accept-Language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7
+// Cookie: jenkins-timestamper-offset=-28800000; pgv_pvi=8298597376
+
                     // At least one byte of the request has been received.
                     // Switch to the socket timeout.
                     // 如果已经收到过数据，则使用soTimeout
                     wrapper.setReadTimeout(wrapper.getEndpoint().getConnectionTimeout());
                 }
                 if (!keptAlive && byteBuffer.position() == 0 && byteBuffer.limit() >= CLIENT_PREFACE_START.length - 1) {
-                    boolean prefaceMatch = true;
+                    boolean prefaceMatch = true;// 判断读到的数据是不是HTTP/2协议的
                     for (int i = 0; i < CLIENT_PREFACE_START.length && prefaceMatch; i++) {
                         if (CLIENT_PREFACE_START[i] != byteBuffer.get(i)) {
                             prefaceMatch = false;
                         }
                     }
-                    if (prefaceMatch) {
+                    if (prefaceMatch) {// 如果不是HTTP/2协议的
                         // HTTP/2 preface matched
                         parsingRequestLinePhase = -1;
                         return false;
@@ -391,7 +408,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                 }
                 // Set the start time once we start reading data (even if it is
                 // just skipping blank lines)
-                if (request.getStartTime() < 0) {
+                if (request.getStartTime() < 0) {// 给coyote.Request设置读取数据的时间
                     request.setStartTime(System.currentTimeMillis());
                 }
                 chr = byteBuffer.get();
@@ -422,7 +439,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                 int pos = byteBuffer.position();
                 byte chr = byteBuffer.get();
                 if (chr == Constants.SP || chr == Constants.HT) {
-                    space = true;
+                    space = true;// 遇到空格，总算解析除了GET，请求方法了
                     request.method().setBytes(byteBuffer.array(), parsingRequestLineStart,
                             pos - parsingRequestLineStart);
                 } else if (!HttpParser.isToken(chr)) {
@@ -446,7 +463,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                 byte chr = byteBuffer.get();
                 if (!(chr == Constants.SP || chr == Constants.HT)) {
                     space = false;
-                    byteBuffer.position(byteBuffer.position() - 1);
+                    byteBuffer.position(byteBuffer.position() - 1);// 读到不是空格或者\t，position，又会被重置
                 }
             }
             parsingRequestLineStart = byteBuffer.position();
@@ -497,7 +514,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                         end - parsingRequestLineQPos - 1);
                 request.requestURI().setBytes(byteBuffer.array(), parsingRequestLineStart,
                         parsingRequestLineQPos - parsingRequestLineStart);
-            } else {
+            } else {// 解析URI
                 request.requestURI().setBytes(byteBuffer.array(), parsingRequestLineStart,
                         end - parsingRequestLineStart);
             }
@@ -550,7 +567,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                 }
             }
 
-            if ((end - parsingRequestLineStart) > 0) {
+            if ((end - parsingRequestLineStart) > 0) {// 设置协议类型
                 request.protocol().setBytes(byteBuffer.array(), parsingRequestLineStart,
                         end - parsingRequestLineStart);
             } else {
@@ -702,7 +719,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
         int bufLength = headerBufferSize +
                 wrapper.getSocketBufferHandler().getReadBuffer().capacity();
         if (byteBuffer == null || byteBuffer.capacity() < bufLength) {
-            byteBuffer = ByteBuffer.allocate(bufLength);
+            byteBuffer = ByteBuffer.allocate(bufLength);//初始化byteBuffer，保存请求头请求首行等信息；此时new String(byteBuffer)啥内容也没有
             byteBuffer.position(0).limit(0);
         }
     }
@@ -713,7 +730,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
 
     /**
      * Attempts to read some data into the input buffer.
-     *
+     * 原来这里才是真正将数据读入到input buffer中的
      * @return <code>true</code> if more data was added to the input buffer
      *         otherwise <code>false</code>
      */
@@ -737,7 +754,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
         }
         byteBuffer.limit(byteBuffer.capacity());
         int nRead = wrapper.read(block, byteBuffer);// 更新读操作的时间
-        byteBuffer.limit(byteBuffer.position()).reset();
+        byteBuffer.limit(byteBuffer.position()).reset();// 将limit更新到position位置，然后position归0；读数据就可以从0到limit了
         if (nRead > 0) {
             return true;
         } else if (nRead == -1) {

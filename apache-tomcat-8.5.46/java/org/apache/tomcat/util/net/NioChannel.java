@@ -136,7 +136,7 @@ public class NioChannel implements ByteChannel {
 
     /**
      * Reads a sequence of bytes from this channel into the given buffer.
-     *
+     * 真正读取数据到指定的ByteBuffer中
      * @param dst The buffer into which bytes are to be transferred
      * @return The number of bytes read, possibly zero, or <code>-1</code> if
      *         the channel has reached end-of-stream
@@ -144,7 +144,7 @@ public class NioChannel implements ByteChannel {
      */
     @Override
     public int read(ByteBuffer dst) throws IOException {
-        return sc.read(dst);
+        return sc.read(dst);// 从socketChannel中读取数据到ByteBuffer中
     }
 
     public Object getAttachment() {

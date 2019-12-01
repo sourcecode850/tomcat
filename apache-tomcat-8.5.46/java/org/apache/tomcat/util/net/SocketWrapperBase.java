@@ -70,7 +70,7 @@ public abstract class SocketWrapperBase<E> {
     private volatile IOException error = null;
 
     /**
-     * The buffers used for communicating with the socket.
+     * The buffers used for communicating with the socket. SocketBufferHandler初始化追踪
      */
     protected volatile SocketBufferHandler socketBufferHandler = null;
 

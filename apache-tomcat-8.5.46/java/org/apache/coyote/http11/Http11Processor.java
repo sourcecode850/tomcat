@@ -227,7 +227,7 @@ public class Http11Processor extends AbstractProcessor {
             Set<String> allowedTrailerHeaders, int maxExtensionSize, int maxSwallowSize,
             Map<String,UpgradeProtocol> httpUpgradeProtocols, boolean sendReasonPhrase,
             String relaxedPathChars, String relaxedQueryChars) {
-
+        // new org.apache.coyote.Request()和new org.apache.coyote.Response()
         super(endpoint);
 
         httpParser = new HttpParser(relaxedPathChars, relaxedQueryChars);
@@ -664,7 +664,7 @@ public class Http11Processor extends AbstractProcessor {
         RequestInfo rp = request.getRequestProcessor();
         rp.setStage(org.apache.coyote.Constants.STAGE_PARSE);
 
-        // Setting up the I/O
+        // Setting up the I/O  初始化Http11InputBuffer中的byteBuffer，用于保存请求信息
         setSocketWrapper(socketWrapper);
 
         // Flags
@@ -677,6 +677,23 @@ public class Http11Processor extends AbstractProcessor {
         while (!getErrorState().isError() && keepAlive && !isAsync() && upgradeToken == null &&
                 sendfileState == SendfileState.DONE && !endpoint.isPaused()) {
 
+            // https://www.xuebuyuan.com/300080.html
+            /**
+             * Http11Processor的rocess方法中，用inputBuffer.parseRequestLine();调用了解析http消息的请求行。
+             * 这里的inputBuffer是tomcat自定义的InternalInputBuffer
+             *
+             * 　需要了解的是：
+             *　1，org.apache.coyote.Request 是tomcat内部使用用于存放关于request消息的数据结构
+             *　2，org.apache.tomcat.util.buf.MessageBytes 用于存放消息，
+             *     在org.apache.coyote.Request中大量用于存放解析后的byte字符
+             *　3，org.apache.tomcat.util.buf.ByteChunk 真正用于存放数据的数据结构，存放的是byte[],
+             *    org.apache.tomcat.util.buf.MessageBytes使用它。
+             *　大流程：
+             *　http消息通过inputBuffer解析后放到Request中，Request把它放到相应的MessageBytes，
+             *  最后MessageBytes把它存到ByteChunk里。
+             *　以上都可以通过方法调用来完成流程。
+             *
+             */
             // Parsing the request header
             // 解析request请求头
             try {
@@ -903,7 +920,7 @@ public class Http11Processor extends AbstractProcessor {
     @Override
     protected final void setSocketWrapper(SocketWrapperBase<?> socketWrapper) {
         super.setSocketWrapper(socketWrapper);
-        inputBuffer.init(socketWrapper);
+        inputBuffer.init(socketWrapper);//  初始化Http11InputBuffer中byteBuffer
         outputBuffer.init(socketWrapper);
     }
 
