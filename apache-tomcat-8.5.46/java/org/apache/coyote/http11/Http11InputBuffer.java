@@ -789,14 +789,14 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                 }
             }
 
-            chr = byteBuffer.get();
+            chr = byteBuffer.get();// 取值，导致position++
 
             if (chr == Constants.CR) {
                 // Skip
             } else if (chr == Constants.LF) {
                 return HeaderParseStatus.DONE;
             } else {
-                byteBuffer.position(byteBuffer.position() - 1);
+                byteBuffer.position(byteBuffer.position() - 1);// 又恢复position
                 break;
             }
 
@@ -824,12 +824,12 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
 
             int pos = byteBuffer.position();
             chr = byteBuffer.get();
-            if (chr == Constants.COLON) {
+            if (chr == Constants.COLON) {// 如果是:，说明到了请求头的key了
                 headerParsePos = HeaderParsePosition.HEADER_VALUE_START;
                 headerData.headerValue = headers.addValue(byteBuffer.array(), headerData.start,
-                        pos - headerData.start);
+                        pos - headerData.start);// 添加请求头
                 pos = byteBuffer.position();
-                // Mark the current buffer position
+                // Mark the current buffer position；标记解析请求头值的初始位置
                 headerData.start = pos;
                 headerData.realPos = pos;
                 headerData.lastSignificantChar = pos;
@@ -872,7 +872,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler 
                             return HeaderParseStatus.NEED_MORE_DATA;
                         }
                     }
-
+                    // 跳过空格
                     chr = byteBuffer.get();
                     if (!(chr == Constants.SP || chr == Constants.HT)) {
                         headerParsePos = HeaderParsePosition.HEADER_VALUE;

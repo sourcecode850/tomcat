@@ -713,6 +713,7 @@ public class Http11Processor extends AbstractProcessor {
                     keptAlive = true;
                     // Set this every time in case limit has been changed via JMX
                     request.getMimeHeaders().setLimit(endpoint.getMaxHeaderCount());
+                    // 真正完成请求头的解析
                     if (!inputBuffer.parseHeaders()) {
                         // We've read part of the request, don't recycle it
                         // instead associate it with the socket
@@ -753,7 +754,7 @@ public class Http11Processor extends AbstractProcessor {
 
             // Has an upgrade been requested?  可以看到各种请求头信息
             Enumeration<String> connectionValues = request.getMimeHeaders().values("Connection");
-            boolean foundUpgrade = false;
+            boolean foundUpgrade = false;// 从请求头中查找foundUpgrade，也就是WebSocket协议
             while (connectionValues.hasMoreElements() && !foundUpgrade) {
                 String connectionValue = connectionValues.nextElement();
                 if (connectionValue != null) {
@@ -790,7 +791,7 @@ public class Http11Processor extends AbstractProcessor {
                 // Setting up filters, and parse some request headers
                 rp.setStage(org.apache.coyote.Constants.STAGE_PREPARE);
                 try {
-                    //
+                    // 准备请求
                     prepareRequest();
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
@@ -1015,7 +1016,7 @@ public class Http11Processor extends AbstractProcessor {
 
         MimeHeaders headers = request.getMimeHeaders();
 
-        // Check connection header
+        // Check connection header：值是keep-alive，长连接
         MessageBytes connectionValueMB = headers.getValue(Constants.CONNECTION);
         if (connectionValueMB != null && !connectionValueMB.isNull()) {
             ByteChunk connectionValueBC = connectionValueMB.getByteChunk();
