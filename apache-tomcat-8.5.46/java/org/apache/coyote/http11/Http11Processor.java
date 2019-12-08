@@ -697,6 +697,7 @@ public class Http11Processor extends AbstractProcessor {
             // Parsing the request header
             // 解析request请求头
             try {
+                // 设置读超时
                 if (!inputBuffer.parseRequestLine(keptAlive)) {//   读数据，解析请求行
                     if (inputBuffer.getParsingRequestLinePhase() == -1) {
                         return SocketState.UPGRADING;
@@ -876,7 +877,7 @@ public class Http11Processor extends AbstractProcessor {
                     outputBuffer.nextRequest();
                 }
             }
-
+            // 设置读超时
             if (!disableUploadTimeout) {
                 int soTimeout = endpoint.getConnectionTimeout();
                 if(soTimeout > 0) {
@@ -1713,6 +1714,7 @@ public class Http11Processor extends AbstractProcessor {
                     sendfileData.keepAliveState = SendfileKeepAliveState.PIPELINED;
                 }
             } else {
+                // keepalive=false的时候，SendfileKeepAliveState.NONE，会关闭socket的
                 sendfileData.keepAliveState = SendfileKeepAliveState.NONE;
             }
             result = socketWrapper.processSendfile(sendfileData);

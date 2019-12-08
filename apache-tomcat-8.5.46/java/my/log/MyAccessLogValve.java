@@ -16,6 +16,7 @@ public class MyAccessLogValve extends AbstractAccessLogValve {
 
     @Override
     protected void log(CharArrayWriter message) {
-        System.out.println("-----------------my.log.MyAccessLogValve-------------");
+        // 注释掉，方便socket超时，复用其他调试
+        // System.out.println("-----------------my.log.MyAccessLogValve-------------");
     }
 }

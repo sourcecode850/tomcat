@@ -468,7 +468,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
     protected class Acceptor extends AbstractEndpoint.Acceptor {
 
         @Override
-        public void run() {
+        public void run() {// Acceptor
 
             int errorDelay = 0;
 
@@ -501,6 +501,9 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                         // Accept the next incoming connection from the server
                         // 接收从server来的下一个socket连接;Acceptor监听请求，获取SocketChannel
                         socket = serverSock.accept();
+                        // debug查看socket内存地址，方便查看；这里可以看到，多次连续短时间请求，
+                        // 不会产生新的socket，也就是一开始产生的socket完成了多次http请求
+                        System.out.println("开启新的socket-------"+socket);
                     } catch (IOException ioe) {
                         // We didn't get a socket
                         countDownConnection();
@@ -643,7 +646,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
         }
 
         @Override
-        public void run() {
+        public void run() {// PollerEvent
             // 如果是注册ops，则将selector注册OP_READ
             if (interestOps == OP_REGISTER) {
                 try {
@@ -757,7 +760,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
          * @return <code>true</code> if some events were processed,
          *   <code>false</code> if queue was empty
          */
-        public boolean events() {
+        public boolean events() {// Poller
             boolean result = false;
 
             PollerEvent pe = null;
@@ -869,7 +872,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
          * appropriate processor as events occur.
          */
         @Override
-        public void run() {
+        public void run() {// Poller
             // Loop until destroy() is called
             while (true) {
                 // Endpoint负责监听请求：准确来说是NioEndpoint的内部类poller负责监听请求
@@ -915,6 +918,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                     // 轮询selector，处理已经准备好的事件
                     SelectionKey sk = iterator.next();
                     // ？？ 这里的sk.attachment为啥是NioSocketWrapper，哪里设置的？？参加NioEndpoint L618行代码
+                    // 这里attachment可以看到可以复用？？
                     NioSocketWrapper attachment = (NioSocketWrapper)sk.attachment();
 
                     /**
@@ -1091,11 +1095,13 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                     // responsible for registering the socket for the
                     // appropriate event(s) if sendfile completes.
                     if (!calledByProcessor) {
+                        // keepAliveState = none
                         switch (sd.keepAliveState) {
                         case NONE: {
                             if (log.isDebugEnabled()) {
                                 log.debug("Send file connection is being closed");
                             }
+                            // 如果达到最大请求次数，或者keepalive时间到了，就会关闭socket了
                             close(sc, sk);
                             break;
                         }
@@ -1634,6 +1640,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                         state = getHandler().process(socketWrapper, event);
                     }
                     if (state == SocketState.CLOSED) {
+                        // nioChannels.push(socket)
                         close(socket, key);
                     }
                 } else if (handshake == -1 ) {
@@ -1659,6 +1666,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 event = null;
                 //return to cache
                 if (running && !paused) {
+                    // SocketProcessor也放入到processorCache缓存中
                     processorCache.push(this);
                 }
             }

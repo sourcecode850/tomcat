@@ -16,25 +16,6 @@
  */
 package org.apache.coyote;
 
-import java.net.InetAddress;
-import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistration;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.servlet.http.HttpUpgradeHandler;
-import javax.servlet.http.WebConnection;
-
 import org.apache.juli.logging.Log;
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.util.ExceptionUtils;
@@ -45,6 +26,22 @@ import org.apache.tomcat.util.net.AbstractEndpoint.Handler;
 import org.apache.tomcat.util.net.SocketEvent;
 import org.apache.tomcat.util.net.SocketWrapperBase;
 import org.apache.tomcat.util.res.StringManager;
+
+import javax.management.*;
+import javax.servlet.http.HttpUpgradeHandler;
+import javax.servlet.http.WebConnection;
+import java.net.InetAddress;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class AbstractProtocol<S> implements ProtocolHandler,
         MBeanRegistration {
@@ -116,7 +113,6 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
      *
      * @param name  The name of the property to set
      * @param value The value, in string form, to set for the property
-     *
      * @return <code>true</code> if the property was set successfully, otherwise
      *         <code>false</code>
      */
@@ -130,7 +126,6 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
      * to use this.
      *
      * @param name The name of the property to get
-     *
      * @return The value of the property converted to a string
      */
     public String getProperty(String name) {
@@ -352,14 +347,14 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         endpoint.setAcceptorThreadCount(threadCount);
     }
     public int getAcceptorThreadCount() {
-      return endpoint.getAcceptorThreadCount();
+        return endpoint.getAcceptorThreadCount();
     }
 
     public void setAcceptorThreadPriority(int threadPriority) {
         endpoint.setAcceptorThreadPriority(threadPriority);
     }
     public int getAcceptorThreadPriority() {
-      return endpoint.getAcceptorThreadPriority();
+        return endpoint.getAcceptorThreadPriority();
     }
 
 
@@ -633,7 +628,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
 
     @Override
     public void resume() throws Exception {
-        if(getLog().isInfoEnabled()) {
+        if (getLog().isInfoEnabled()) {
             getLog().info(sm.getString("abstractProtocolHandler.resume", getName()));
         }
 
@@ -734,9 +729,11 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                 // Nothing to do. Socket has been closed.
                 return SocketState.CLOSED;
             }
-
+            // 如果socket可以完成复用的话，这里肯定可以多次获取到相同内存地址的socket吧
             S socket = wrapper.getSocket();
-            // 根据Socket获取具体协议的处理器
+            System.out.println("复用socket---------" + socket.hashCode() + ":" + socket);
+            // 根据Socket获取具体协议的处理器;
+            // 协议处理器是多例的；可以将socket和协议处理器Http11Processor缓存起来；只针对upgrade协议
             Processor processor = connections.get(socket);
             // 如果process==null，尝试其它协议、新建等
             // SSL 支持
@@ -901,8 +898,17 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                     // In keep-alive but between requests. OK to recycle
                     // processor. Continue to poll for the next request.
                     connections.remove(socket);
-                    // 799上面创建的Http11Processor协议处理器放入到缓存中
+                    // 799上面创建的Http11Processor协议处理器放入到缓存中；只有UpgradeProcessorBase才会按照socket键值对
+                    // 作缓存，效率高；而一般的http协议，只会将processor做缓存，没有对应性，不管哪个socket创建得到的processor
+                    // 每次都去栈定的processor进行处理
+                    // After recycling, only instances of UpgradeProcessorBase will
+                    // return true for isUpgrade().
+                    // Instances of UpgradeProcessorBase should not be added to
+                    // recycledProcessors since that pool is only for AJP or HTTP
+                    // processors
                     release(processor);
+                    // 这里会将socket（NioChannel#SocketChannelImp）重新放入到PollerEvent中;
+                    // NioChannel socket = socketWrapper.getSocket();socketWrapper这里是没有的
                     wrapper.registerReadInterest();
                 } else if (state == SocketState.SENDFILE) {
                     // Sendfile in progress. If it fails, the socket will be
@@ -948,6 +954,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                             }
                         }
                     } else {
+                        // 将processor放入到recycledProcessors中； state=CLOSED
                         release(processor);
                     }
                 }
@@ -1036,7 +1043,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         public void release(SocketWrapperBase<S> socketWrapper) {
             S socket = socketWrapper.getSocket();
             Processor processor = connections.remove(socket);
-            release(processor);
+            release(processor);// 将processor放入到recycledProcessors栈中
         }
 
 

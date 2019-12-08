@@ -301,6 +301,7 @@ public class CoyoteAdapter implements Adapter {
             throws Exception {
         // 原来这里还可以将上个请求的过滤器链复用啊
         // org.apache.coyote.Request注意不是connector.Request，是final类，覆盖toString()方法
+        // 这里随便取出哪个Http11Processor的request缓存，有待研究！！！
         Request request = (Request) req.getNote(ADAPTER_NOTES);
         Response response = (Response) res.getNote(ADAPTER_NOTES);
         // request == null，新建并关联

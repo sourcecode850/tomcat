@@ -703,7 +703,21 @@ public abstract class AbstractEndpoint<S> {
     /**
      * Max keep alive requests
      */
+    // 将最大的maxKeepAliveRequests设置成3试试看，可以看到没3次请求机会新的socket了，验证了猜想
     private int maxKeepAliveRequests=100; // as in Apache HTTPD server
+    /**
+     *复用socket---------278797059:org.apache.tomcat.util.net.NioChannel@109e1b03:java.nio.channels.SocketChannel[connected local=/0:0:0:0:0:0:0:1:8080 remote=/0:0:0:0:0:0:0:1:6526]
+     *复用socket---------278797059:org.apache.tomcat.util.net.NioChannel@109e1b03:java.nio.channels.SocketChannel[connected local=/0:0:0:0:0:0:0:1:8080 remote=/0:0:0:0:0:0:0:1:6526]
+     *复用socket---------278797059:org.apache.tomcat.util.net.NioChannel@109e1b03:java.nio.channels.SocketChannel[connected local=/0:0:0:0:0:0:0:1:8080 remote=/0:0:0:0:0:0:0:1:6526]
+     *复用socket---------1310899508:org.apache.tomcat.util.net.NioChannel@4e22bd34:java.nio.channels.SocketChannel[connected local=/0:0:0:0:0:0:0:1:8080 remote=/0:0:0:0:0:0:0:1:6527]
+     *复用socket---------1310899508:org.apache.tomcat.util.net.NioChannel@4e22bd34:java.nio.channels.SocketChannel[connected local=/0:0:0:0:0:0:0:1:8080 remote=/0:0:0:0:0:0:0:1:6527]
+     *复用socket---------1310899508:org.apache.tomcat.util.net.NioChannel@4e22bd34:java.nio.channels.SocketChannel[connected local=/0:0:0:0:0:0:0:1:8080 remote=/0:0:0:0:0:0:0:1:6527]
+     *复用socket---------278797059:org.apache.tomcat.util.net.NioChannel@109e1b03:java.nio.channels.SocketChannel[connected local=/0:0:0:0:0:0:0:1:8080 remote=/0:0:0:0:0:0:0:1:6532]
+     *复用socket---------278797059:org.apache.tomcat.util.net.NioChannel@109e1b03:java.nio.channels.SocketChannel[connected local=/0:0:0:0:0:0:0:1:8080 remote=/0:0:0:0:0:0:0:1:6532]
+     *复用socket---------278797059:org.apache.tomcat.util.net.NioChannel@109e1b03:java.nio.channels.SocketChannel[connected local=/0:0:0:0:0:0:0:1:8080 remote=/0:0:0:0:0:0:0:1:6532]
+     *
+     * 更改connectionTimeout也可以看到类似的效果
+     */
     public int getMaxKeepAliveRequests() {
         return maxKeepAliveRequests;
     }
